@@ -54,7 +54,7 @@ export const MissionsScreen: React.FC<MissionsScreenProps> = ({
   const handleSkipCurrent = () => perform(onSkipTask);
 
   return (
-    <div className="flex-1 flex flex-col justify-between overflow-hidden relative select-none bg-[#f3e6cf]">
+    <div className="missions-screen flex-1 min-h-0 flex flex-col justify-between overflow-hidden relative select-none bg-[#f3e6cf]">
       {/* Background Dot Pattern */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -153,7 +153,7 @@ export const MissionsScreen: React.FC<MissionsScreenProps> = ({
                 <div
                   key={task.id}
                   onClick={() => handleOpenTask(task)}
-                  className={`rounded-xl p-2.5 cursor-pointer relative group flex items-center gap-3 transition-all border-2 ${
+                  className={`mission-row rounded-xl p-2.5 cursor-pointer relative group grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-2.5 gap-y-1 transition-all border-2 ${
                     task.isCompleted
                       ? 'bg-[#eaf6ea] border-[#234e2c] shadow-[0_4px_0_#234e2c]'
                       : 'bg-[#faf3e6] border-[#3e2314] shadow-[0_4px_0_#3e2314] active:translate-y-0.5'
@@ -161,7 +161,7 @@ export const MissionsScreen: React.FC<MissionsScreenProps> = ({
                 >
                   {/* Left Pixel Icon */}
                   <div
-                    className={`w-11 h-11 border-2 rounded-lg flex items-center justify-center shrink-0 shadow-inner ${
+                    className={`w-10 h-10 row-span-2 border-2 rounded-lg flex items-center justify-center shrink-0 shadow-inner ${
                       task.isCompleted
                         ? 'bg-emerald-100 border-emerald-600'
                         : 'bg-amber-50 border-[#7a4823]'
@@ -171,7 +171,7 @@ export const MissionsScreen: React.FC<MissionsScreenProps> = ({
                   </div>
 
                   {/* Center Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <h3
                         className={`text-sm font-bold tracking-tight leading-snug ${
@@ -190,7 +190,7 @@ export const MissionsScreen: React.FC<MissionsScreenProps> = ({
                         <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                       )}
                     </div>
-                    <p className="text-xs text-stone-500 font-medium flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-stone-500 font-medium flex flex-wrap items-center gap-1 mt-0.5">
                       <span>🪴</span>
                       <span className="truncate">{task.plantName}</span>
                       <span className="text-stone-400 text-[10px]">• {task.plantSpecies}</span>
@@ -198,8 +198,8 @@ export const MissionsScreen: React.FC<MissionsScreenProps> = ({
                   </div>
 
                   {/* Right Reward Badge */}
-                  <div className="flex flex-col items-end shrink-0 gap-0.5">
-                    <div className="bg-amber-100 border border-amber-400 text-amber-900 font-pixel text-[11px] px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                  <div className="col-start-2 min-w-0 flex flex-wrap items-center justify-between gap-1">
+                    <div className="bg-amber-100 border border-amber-400 text-amber-900 text-[11px] font-semibold px-2 py-0.5 rounded shadow-sm flex items-center gap-1 whitespace-nowrap">
                       <span>✨</span>
                       <span>{task.reward}</span>
                     </div>
