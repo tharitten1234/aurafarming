@@ -1,0 +1,17 @@
+export const ASSETS = {
+  avatar: '/avatar_farmer_aur.png',
+  gardenPixelArt: '/garden-empty-floor.png',
+  emptyPot: '/empty-pot.png',
+  plantsAtlas: '/plants-atlas.png',
+  plant1Thumb: '/plant1_thumb.png',
+  plant2Thumb: '/plant2_thumb.png',
+  plant3Thumb: '/plant3_thumb.png',
+  plant4Thumb: '/plant4_thumb.png',
+  wateringCanThumb: '/watering_can_thumb.png',
+  monsteraScanned: 'https://lh3.googleusercontent.com/aida-public/AB6AXuABSs8kAI1uu-eBbxhon4G2Tdtc1npTSpQQLmHJLIgPRl5bMijAY-YnkSlYFx8yMG75F-Pqm334qhNS-3S0s6kyMkj76oX_smqepnKk6VDxfsMsM-i2cE7ew1R2v4IW9VAnlb9MYKZmTEWsP4U07cEwhlXLNb_pXdDeP4l445Xkb_gZtYF5IrmB-ICUiL-hJKnCYNlMoOE7hapwNuWV0UQYvGsia-5aWUTqLz86d-s74Iu0mv64IZRX',
+  viewfinderFeed: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPUFW3ReANWciAtRwxOQj88jc3dz29vRgg44ax7G4Nt4GIbDTfYjIgcTplkSvq9OAK_nB_XQ9HGDpoFcO8zueq8KkyPi0XkBVbKXSlnlRZ-jP9f8PGyPCZQ2PoAd-XCMpZnqY960KK0dWmTbg9YfzKmHVVkhFBVze8FkxDCQbicIeWh3xiyLEcA7Y96t7XOKvwfRtoG8irbb96z_f_DeYAzfAMHuVDgn-X1xCkxOTEV0TF6nYPQVaG',
+  pixelMonstera: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDCnKo6FZEOta18yFB5EBJjbzLuKo6cmEv_JUbQaWonlNCxbpgn9ldJpXkC0lQzWhOYmAZVmmy7A_4vCB0a5rHW40f_kSpqvx685QW36P6u_HH7o_dw7OLvlI48EOQEBksWW_GV8aoZWvkrrXEyNQgRDc4PEugWCHnp1VZgqB95czO8CiMEwGvEiO8Up0qiuxrkwjlVLYEa-5pYmMrM0BPNUnmxY6ia0jOQs8w6UI7vuQEVI13ILPLx',
+  timeline1: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB2tHGchDbIE-6jtprLmM7KVK2CI89NK1DLxo21kEASp3LRaUYKnq9kaJn_QjIprnPgTUej877q9rPox90pS5kdNQmiHfM1aJ1i_MOgSEsKbE43Yfe_Pcpvpj26_cbX_IXK0E77N7RhxLNcT2O0gvxb1VDpu3-snj6GtFEQG8WSrKKZlOs48khLj32gvA4nTd8ZL-B4aYV-bXtQugZgOFqqAGbkfStAVxTHt0TE__WlBbvLvegBmCpr',
+  timeline2: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAjoip1rOb930dBKNdIMD3btA2coSkVph3fyfBiqtN2vG5pq7KixjUABQHxvJqjk6-hGPXk1E8GJWxJ3YPY2GxpjjDY-tI2m82LT2mDW5ddqBprLteXlg4Rv9EC2E3uV_Mk2aLscYk2LhrIi6p2xaok_JLvqQJdpfyuyZ6msOBFKbqwyo7cPgn0EOq6kW-Or9FurYV6ZgNSQddqYcmL9wwwRwb_rOONTwMZ7jqWv48_VNk3rjw0yCIe',
+  timeline3: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCVT8JOuzI_y9UrD9kJ155pdrB5c3pq6xSoK1-EXSZX1Diyds-f-R8SMZHqx-kPxji8Tcv9g3CcJsFHZn50zw9xhbNYFD0_wVF1NLaSuk6wswNyQ9gOQe38pZW6O5BLgM1-WvSCJ4KLGnbuOusAjuHxLQzBpZfHorpZAS7HlQS6EmeZwXBwmAOL37yrQZ_PyhwrmszNvlFK5K5r_vgEJnMhn0tJzsGXzFaNGnt0P8cUaN96sLINlhVd',
+};

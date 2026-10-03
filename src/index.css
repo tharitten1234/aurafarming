@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-dark-wood: #190f09;
+    --panel-wood: #2c1a11;
+    --panel-wood-inner: #3a2217;
+    --wood-border-dark: #120905;
+    --wood-border-light: #5a3624;
+    --gold-accent: #f7ce68;
+    --gold-text: #fef3c7;
+    --emerald-green: #23a059;
+    --emerald-green-dark: #14693a;
+    --emerald-green-light: #3be282;
+  }
+
+  body {
+    font-family: 'Prompt', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #120904;
+    color: #faebd7;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.font-pixel {
+  font-family: 'Press Start 2P', monospace;
+}
+
+.font-silkscreen {
+  font-family: 'Silkscreen', monospace;
+}
+
+.font-mali {
+  font-family: 'Mali', cursive, sans-serif;
+}
+
+.font-prompt {
+  font-family: 'Prompt', sans-serif;
+}
+
+/* Crisp pixel art rendering */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Retro 3D Wooden Bevel Box */
+.wood-box {
+  background: linear-gradient(180deg, #3d2417 0%, #29180f 100%);
+  box-shadow: 
+    inset 2px 2px 0px rgba(255, 255, 255, 0.12),
+    inset -2px -2px 0px rgba(0, 0, 0, 0.5),
+    0 4px 10px rgba(0, 0, 0, 0.5);
+  border: 3px solid #140a06;
+}
+
+.wood-button {
+  background: linear-gradient(180deg, #4b2d1c 0%, #321c11 100%);
+  border: 2px solid #160c07;
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15), inset -1px -2px 0px rgba(0, 0, 0, 0.6);
+  transition: transform 0.08s ease, filter 0.08s ease;
+}
+.wood-button:active {
+  transform: translateY(2px);
+  box-shadow: inset 1px 2px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Emerald Pixel Action Button */
+.emerald-btn {
+  background: linear-gradient(180deg, #32ca73 0%, #1e9652 50%, #13773f 100%);
+  border: 3px solid #0c3e21;
+  box-shadow: 
+    inset 0 2px 0px rgba(255, 255, 255, 0.35),
+    inset 0 -3px 0px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(19, 119, 63, 0.45);
+  transition: all 0.1s ease;
+}
+.emerald-btn:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(19, 119, 63, 0.3);
+}
+
+/* Pixel Badge */
+.confidence-badge {
+  background: #114227;
+  border: 2px solid #2ae07d;
+  box-shadow: inset 0 0 6px rgba(42, 224, 125, 0.3);
+}
+
+/* Pixel Accent Dots */
+.pixel-sparkle {
+  width: 6px;
+  height: 6px;
+  background-color: var(--gold-accent);
+  box-shadow: 0 0 4px var(--gold-accent);
+  transform: rotate(45deg);
+}
+
+/* Unselected Option Style */
+.opt-unselected {
+  background: #2c170d;
+  box-shadow: 
+    inset 2px 2px 0px 0px #4e2917,
+    inset -2px -2px 0px 0px #150904,
+    0 3px 0 #120804;
+}
+.opt-unselected:hover {
+  background: #341c10;
+}
+
+/* Selected Option Style (Golden-Green Aura) */
+.opt-selected {
+  background: linear-gradient(180deg, #1b3d2b 0%, #11281c 100%);
+  border-color: #10b981 !important;
+  box-shadow: 
+    0 0 0 2px #34d399,
+    inset 2px 2px 0px 0px #6ee7b7,
+    inset -2px -2px 0px 0px #064e3b,
+    0 4px 12px rgba(16, 185, 129, 0.45);
+}
+
+/* Primary RPG glowing button */
+.primary-rpg-btn {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 60%, #15803d 100%);
+  border: 3px solid #0f5127;
+  box-shadow: 
+    inset 0 3px 0px rgba(255, 255, 255, 0.4),
+    inset 0 -3px 0px rgba(0, 0, 0, 0.35),
+    0 5px 0 #0a351a,
+    0 8px 16px rgba(16, 185, 129, 0.4);
+}
+.primary-rpg-btn:active {
+  transform: translateY(3px);
+  box-shadow: 
+    inset 0 2px 0px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0px rgba(0, 0, 0, 0.4),
+    0 2px 0 #0a351a,
+    0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Header bevel */
+.header-wood-bevel {
+  background: linear-gradient(180deg, #442414 0%, #2f170c 100%);
+  border: 3px solid #140b07;
+  box-shadow: 
+    inset 0 2px 0 #6e3c21,
+    inset 0 -2px 0 #180c06,
+    0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Retro Dotted BG */
+.retro-bg-dots {
+  background-color: #f7f1e5;
+  background-image: radial-gradient(#d6c9b3 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+/* Shutter camera button */
+.pixel-shutter {
+  background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a 60%, #14532d);
+  border: 5px solid #26160d;
+  box-shadow: 
+    0 0 0 4px #58ba57,
+    0 0 0 7px #1c0e08,
+    inset 0 3px 6px rgba(255, 255, 255, 0.4),
+    0 6px 10px rgba(0, 0, 0, 0.6);
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+.pixel-shutter:active {
+  transform: scale(0.93) translateY(2px);
+  filter: brightness(0.9);
+}
+
+/* Scan reticle pattern */
+.scan-reticle {
+  background-image: 
+    linear-gradient(rgba(74, 222, 128, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 222, 128, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Floating Center Camera Orb */
+.scan-orb {
+  background: radial-gradient(circle at 35% 30%, #5eead4, #10b981 40%, #047857 85%);
+  border: 4px solid #ffffff;
+  box-shadow: 
+    0 0 0 3px #1e3a1f,
+    0 6px 12px rgba(16, 185, 129, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6);
+}
+.scan-orb:active {
+  transform: translateY(2px);
+}
+
+/* Custom scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+button:disabled { cursor: wait; opacity: .6; }
+
+.app-shell { --phone-height: 100dvh; --navigation-height: calc(min(100vw, 430px) * 0.21); --navigation-clearance: calc(var(--navigation-height) * 1.5); }
+.garden-navigation { height: var(--navigation-height); }
+.garden-scene-art { height: calc(100% - var(--navigation-clearance)); }
+.app-shell button[aria-label="ย้อนกลับ"] { min-width: 44px; min-height: 44px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 2px solid #c99451; border-radius: 10px; background: #4a2813; color: #fff1d4; font-size: 0; box-shadow: 0 3px 0 #241309; }
+.app-shell button[aria-label="ย้อนกลับ"] > * { display: none; }
+.app-shell button[aria-label="ย้อนกลับ"]::after { content: '←'; font-family: Arial, sans-serif; font-size: 28px; font-weight: 700; line-height: 1; }
+.app-shell button[aria-label="ย้อนกลับ"]:focus-visible { outline: 3px solid #fcd477; outline-offset: 2px; }
+@media (min-width: 640px) {
+  .app-shell { --phone-height: min(844px, calc(100dvh - 32px)); --navigation-height: calc(min(390px, (100dvh - 32px) * 390 / 844) * 0.21); }
+}
+

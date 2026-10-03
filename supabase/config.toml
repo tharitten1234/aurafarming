@@ -1,0 +1,10 @@
+project_id = "aurafarming"
+
+[auth]
+enabled = true
+enable_anonymous_sign_ins = true
+
+[functions.analyze-plant]
+verify_jwt = false
+import_map = "./functions/analyze-plant/deno.json"
+# Handler verifies the bearer token with auth.getUser().

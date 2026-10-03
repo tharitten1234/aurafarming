@@ -1,0 +1,6 @@
+{
+  "name": "AuraFarming - สแกนและดูแลพืชสไตล์พิกเซิล",
+  "description": "แอปพลิเคชันดูแลพืชและสแกนต้นไม้สไตล์พิกเซิลเรโทร ตรวจวัดความเข้ากันของแสงและพื้นที่ (AuraScore) ภารกิจดูแลต้นไม้ และบันทึกการเติบโต",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
