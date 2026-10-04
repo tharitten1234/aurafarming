@@ -1,6 +1,6 @@
 # AuraFarming seminar MVP
 
-Feature rules prepared on `train-ai2` are documented in [TRAIN-AI2-FEATURES](docs/TRAIN-AI2-FEATURES.md). The accompanying care/mission migration must be applied before enabling this branch against the hosted database.
+Feature rules on `train-ai2` are documented in [TRAIN-AI2-FEATURES](docs/TRAIN-AI2-FEATURES.md). The care/mission migration and Gemini care guidance are deployed to the existing Supabase project; hosted reward and watering checks passed with all test records rolled back.
 
 Uses the updated friend-supplied RAR UI (garden scene, collection, login, care, timeline and profile) with the existing React + TypeScript + Vite + Tailwind and Supabase integration. See `docs/FRIEND-UI-UPGRADE.md` for the completed upgrade and verification.
 
