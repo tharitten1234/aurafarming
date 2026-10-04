@@ -204,6 +204,11 @@ export const CareDetailScreen: React.FC<CareDetailScreenProps> = ({
         </section>
 
         {/* Plant Tasks Section (Real Tasks for this specific plant) */}
+        {plant.identification?.description && <section className="rounded-xl border-2 border-[#4d2a17] bg-[#fffbf0] p-3 text-xs text-[#3e2314] leading-relaxed">
+          <h3 className="font-bold mb-1">🌱 คำแนะนำการดูแล{plant.source==='ai'?'จาก AI':''}</h3>
+          <p>{plant.identification.description}</p>
+          {!!plant.identification.warnings.length && <p className="mt-2 text-amber-900">{plant.identification.warnings.join(' • ')}</p>}
+        </section>}
         <section className="w-full">
           <div className="bg-[#fffbf0] border-3 border-[#180c07] rounded-lg p-3 shadow-[3px_3px_0px_#180c07]">
             <div className="flex items-center justify-between border-b-2 border-dashed border-[#d8be9f] pb-1.5 mb-2">

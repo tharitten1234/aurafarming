@@ -18,12 +18,12 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
  const isLowConfidence=!selectedPlant.manual&&(selectedPlant.confidence<60||!identification.isPlant);
  const top3Candidates=[result.primary,...result.alternatives].filter(c=>c.scientificName).slice(0,3);
   return (
-    <div className="flex-1 flex flex-col justify-between overflow-hidden relative select-none bg-[#1a0f09]">
+    <div className="identify-screen flex-1 min-h-0 flex flex-col justify-between overflow-hidden relative select-none bg-[#1a0f09]">
       {/* Decorative Top Edge */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#2c170c] via-[#6d4223] to-[#2c170c] border-b border-[#0d0704]" />
 
       {/* Top Header */}
-      <header className="w-full px-4 pt-3.5 pb-2 flex items-center justify-between z-10 shrink-0">
+      <header className="w-full px-3 pt-2 pb-1 flex items-center justify-between gap-2 z-10 shrink-0">
         {/* Back Button */}
         <button
           type="button"
@@ -42,7 +42,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
         {/* Center Title */}
         <div className="flex items-center space-x-1.5">
           <span className="pixel-sparkle" />
-          <h1 className="text-base font-bold text-[#fedda0] tracking-wide drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+          <h1 className="text-sm font-bold text-[#fedda0] text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
             ผลการระบุชนิดพืช
           </h1>
           <span className="pixel-sparkle" />
@@ -56,7 +56,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
       </header>
 
       {/* Content Area */}
-      <div className="px-4 py-2 flex-1 flex flex-col items-center justify-start space-y-3 overflow-y-auto no-scrollbar">
+      <div className="min-h-0 px-3 py-2 flex-1 flex flex-col items-center justify-start space-y-3 overflow-y-auto no-scrollbar">
         {/* Loading AI State */}
         {isAnalyzing ? (
           <div className="w-full py-16 flex flex-col items-center justify-center space-y-4">
@@ -74,7 +74,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
             {/* Scanned Plant Photo Card */}
             <section className="w-full relative mt-1" data-purpose="plant-photo-card">
               <div className="wood-box rounded-2xl p-2.5 relative">
-                <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 border-[#160b06] shadow-inner bg-[#0e0704]">
+                <div className="relative w-full h-[clamp(150px,28dvh,220px)] rounded-xl overflow-hidden border-2 border-[#160b06] shadow-inner bg-[#0e0704]">
                   <img
                     src={scannedImage || ASSETS.monsteraScanned}
                     alt="ภาพถ่ายต้นไม้ที่สแกน"
@@ -153,7 +153,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
 
             {/* Selected Plant Headline Details */}
             <section className="w-full text-center pt-1 flex flex-col items-center">
-              <h2 className="text-xl font-bold text-[#faebd7] tracking-normal drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              <h2 className="text-lg font-bold text-[#faebd7] break-words max-w-full tracking-normal drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                 {selectedPlant.name}
               </h2>
               <p className="text-xs italic text-[#d4af37] font-medium tracking-wide mt-0.5">
@@ -247,19 +247,19 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
       </div>
 
       {/* Bottom Action Section */}
-      <footer className="w-full px-4 pt-2 pb-5 bg-gradient-to-t from-[#140a06] via-[#1a0f09] to-transparent flex flex-col items-center space-y-2 shrink-0">
+      <footer className="w-full px-3 pt-2 pb-3 bg-gradient-to-t from-[#140a06] via-[#1a0f09] to-transparent flex flex-col items-center space-y-2 shrink-0">
         {/* Primary Action Button: Confirm */}
         <button
           type="button"
           onClick={handleConfirm}
           disabled={isAnalyzing || (!selectedPlant.manual && (!identification.isPlant || !selectedPlant.scientificName))}
-          className="w-full py-3.5 px-6 emerald-btn rounded-2xl flex items-center justify-center space-x-2 text-white font-bold text-base shadow-lg cursor-pointer disabled:opacity-50"
+          className="w-full py-2.5 px-3 emerald-btn rounded-xl flex items-center justify-center space-x-2 text-white font-bold text-sm shadow-lg cursor-pointer disabled:opacity-50"
         >
           <svg className="w-5 h-5 text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-            ยืนยันเลือก {selectedPlant.name}
+            ยืนยันเลือกพืชนี้
           </span>
         </button>
 

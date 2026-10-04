@@ -12,7 +12,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
-Only the publishable key belongs in the browser. Never put `GEMINI_API_KEY` or a Supabase service-role key in a VITE_ variable. `.env.local` is ignored by Git. Run `npm run dev`, then open http://localhost:3000.
+Only the publishable key belongs in the browser. Never put `PLANTNET_API_KEY` or a Supabase service-role key in a VITE_ variable. `.env.local` is ignored by Git. Run `npm run dev`, then open http://localhost:3000.
 
 ## Supabase setup
 
@@ -76,4 +76,12 @@ Use an HTTPS deployment of the built `dist` directory, or a trusted HTTPS tunnel
 - A per-user scan limit is 20/hour; anonymous account abuse controls/CAPTCHA require project configuration for a public release.
 - Hosted verification and physical phone camera results are recorded in `docs/IMPLEMENTATION.md`. Do not infer them from the local tests.
 
-References: [Supabase anonymous sessions](https://supabase.com/docs/guides/auth/auth-anonymous), [Storage RLS](https://supabase.com/docs/guides/storage/security/access-control), [Edge Function auth](https://supabase.com/docs/guides/functions/auth), [Gemini structured output](https://ai.google.dev/gemini-api/docs/structured-output).
+References: [Supabase anonymous sessions](https://supabase.com/docs/guides/auth/auth-anonymous), [Storage RLS](https://supabase.com/docs/guides/storage/security/access-control), [Edge Function auth](https://supabase.com/docs/guides/functions/auth), [Pl@ntNet identification API](https://my.plantnet.org/doc/api/identify).
+
+## Pl@ntNet recognition
+
+New scans use Pl@ntNet v2 (all floras, automatic organ detection). The server requests up to five species and keeps the existing scan/plant schema and owner checks. Gemini translates each candidate's common name into Thai and supplies Thai care recommendations for that exact scientific species. Scientific names and Pl@ntNet confidence scores are preserved. The legacy gemini_model audit column records plantnet-v2/all; historical scans remain readable. API scores are provider confidence scores, not guarantees.
+
+Pl@ntNet does not return care requirements. The server enriches recognized plants with Gemini using GEMINI_API_KEY and optional GEMINI_CARE_MODEL (falls back to GEMINI_MODEL, then gemini-3.8-flash). Unknown care requirements remain null/unknown. Thai common names are required; a failed Gemini request shows a retryable error rather than saving an untranslated result. A Species not found response is normalized to a non-plant result and does not call Gemini. Existing saved scans are not rewritten.
+
+Live Gemini care verification returned ชบา for Hibiscus rosa-sinensis and care advice while retaining the supplied species and confidence. The temporary protected verification function was deleted afterward; no accounts or garden records were created. Mission rows and identification content were visually checked at 340 × 707 pixels.
