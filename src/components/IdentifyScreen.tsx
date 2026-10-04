@@ -10,7 +10,7 @@ type DisplayCandidate={name:string;scientificName:string;confidence:number;confi
 const display=(raw:PlantCandidate,manual=false):DisplayCandidate=>({name:raw.commonName,scientificName:raw.scientificName,confidence:Math.round(raw.confidence*100),confidenceText:manual?'ผู้ใช้เลือกเอง':Math.round(raw.confidence*100)+'%',features:candidateFeatures(raw),raw,manual});
 export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:identification,onBack,onConfirm,onRetake,onShowToast})=>{
  const isAnalyzing=false;
- const result={primary:display(identification),alternatives:identification.alternativeCandidates.map(p=>display(p)),isUnclear:identification.confidence<.6,unclearReason:identification.isPlant?identification.description:'ภาพนี้ไม่พบพืช กรุณาถ่ายภาพใหม่'};
+ const result={primary:display(identification),alternatives:identification.alternativeCandidates.map(p=>display(p)),isUnclear:identification.confidence<.6,unclearReason:identification.isPlant?'Pl@ntNet ให้ความมั่นใจต่ำ กรุณาถ่ายใบหรือดอกให้ชัดขึ้น และตรวจชนิดพืชก่อนใช้คำแนะนำการดูแล':'ภาพนี้ไม่พบพืช กรุณาถ่ายภาพใหม่'};
  const [selectedPlant,setSelectedPlant]=useState<DisplayCandidate>(result.primary);
  const [showSearchModal,setShowSearchModal]=useState(false),[searchQuery,setSearchQuery]=useState('');
  const handleConfirm=()=>{if(!selectedPlant.manual&&(!identification.isPlant||!selectedPlant.scientificName))return;onConfirm(selectedPlant.raw,selectedPlant.manual);};
@@ -18,12 +18,12 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
  const isLowConfidence=!selectedPlant.manual&&(selectedPlant.confidence<60||!identification.isPlant);
  const top3Candidates=[result.primary,...result.alternatives].filter(c=>c.scientificName).slice(0,3);
   return (
-    <div className="flex-1 flex flex-col justify-between overflow-hidden relative select-none bg-[#1a0f09]">
+    <div className="identify-screen flex-1 min-h-0 flex flex-col justify-between overflow-hidden relative select-none bg-[#1a0f09]">
       {/* Decorative Top Edge */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#2c170c] via-[#6d4223] to-[#2c170c] border-b border-[#0d0704]" />
 
       {/* Top Header */}
-      <header className="w-full px-4 pt-3.5 pb-2 flex items-center justify-between z-10 shrink-0">
+      <header className="w-full px-3 pt-2 pb-1 flex items-center justify-between gap-2 z-10 shrink-0">
         {/* Back Button */}
         <button
           type="button"
@@ -42,21 +42,21 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
         {/* Center Title */}
         <div className="flex items-center space-x-1.5">
           <span className="pixel-sparkle" />
-          <h1 className="text-base font-bold text-[#fedda0] tracking-wide drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+          <h1 className="text-sm font-bold text-[#fedda0] text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
             ผลการระบุชนิดพืช
           </h1>
           <span className="pixel-sparkle" />
         </div>
 
-        {/* Gemini Badge */}
+        {/* Recognition provider */}
         <div className="px-2 py-1 bg-[#12281a] border border-[#235e38] rounded-xl flex items-center gap-1 text-[10px] text-[#8bf7be]">
           <span>🌿</span>
-          <span className="font-semibold">Gemini</span>
+          <span className="font-semibold">Pl@ntNet</span>
         </div>
       </header>
 
       {/* Content Area */}
-      <div className="px-4 py-2 flex-1 flex flex-col items-center justify-start space-y-3 overflow-y-auto no-scrollbar">
+      <div className="min-h-0 px-3 py-2 flex-1 flex flex-col items-center justify-start space-y-3 overflow-y-auto no-scrollbar">
         {/* Loading AI State */}
         {isAnalyzing ? (
           <div className="w-full py-16 flex flex-col items-center justify-center space-y-4">
@@ -65,7 +65,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
               <span className="absolute text-3xl animate-bounce">🌿</span>
             </div>
             <div className="text-center space-y-1">
-              <p className="font-bold text-sm text-emerald-300 font-pixel">Gemini ANALYZING...</p>
+              <p className="font-bold text-sm text-emerald-300 font-pixel">Pl@ntNet ANALYZING...</p>
               <p className="text-xs text-[#d8be9f]">กำลังส่งภาพไปวิเคราะห์สายพันธุ์และคำนวณค่าความมั่นใจ</p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
             {/* Scanned Plant Photo Card */}
             <section className="w-full relative mt-1" data-purpose="plant-photo-card">
               <div className="wood-box rounded-2xl p-2.5 relative">
-                <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 border-[#160b06] shadow-inner bg-[#0e0704]">
+                <div className="relative w-full h-[clamp(150px,28dvh,220px)] rounded-xl overflow-hidden border-2 border-[#160b06] shadow-inner bg-[#0e0704]">
                   <img
                     src={scannedImage || ASSETS.monsteraScanned}
                     alt="ภาพถ่ายต้นไม้ที่สแกน"
@@ -102,8 +102,8 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
                       isLowConfidence ? 'bg-rose-400' : selectedPlant.confidence >= 80 ? 'bg-[#3ce385]' : 'bg-amber-400'
                     }`}
                   />
-                  <span className="text-xs font-semibold tracking-wide">
-                    {isLowConfidence ? 'ความมั่นใจต่ำ ' : 'Gemini มั่นใจ '}
+                  <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
+                    {selectedPlant.manual ? '' : isLowConfidence ? 'Pl@ntNet ความมั่นใจต่ำ ' : 'Pl@ntNet มั่นใจ '}
                     {selectedPlant.confidenceText}
                   </span>
                 </div>
@@ -153,7 +153,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
 
             {/* Selected Plant Headline Details */}
             <section className="w-full text-center pt-1 flex flex-col items-center">
-              <h2 className="text-xl font-bold text-[#faebd7] tracking-normal drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              <h2 className="text-lg font-bold text-[#faebd7] break-words max-w-full tracking-normal drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                 {selectedPlant.name}
               </h2>
               <p className="text-xs italic text-[#d4af37] font-medium tracking-wide mt-0.5">
@@ -174,11 +174,18 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
               </div>
             </section>
 
-            {/* Requirement 1: Top 3 Candidate Results Display */}
+            {(selectedPlant.manual || identification.isPlant) && selectedPlant.raw.description && (
+              <section className="w-full rounded-xl border border-[#4d2a17] bg-[#23140c] p-3 text-xs text-[#eed9c4] leading-relaxed">
+                <h3 className="font-semibold text-[#fedda0] mb-1">🌱 {selectedPlant.manual ? 'คำแนะนำจากฐานข้อมูลพืช' : 'ชื่อไทยและคำแนะนำการดูแลจาก Gemini'}</h3>
+                <p>{selectedPlant.raw.description}</p>
+              </section>
+            )}
+
+            {/* Top 3 recognition candidates */}
             <section className="w-full space-y-2">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold text-[#fedda0] flex items-center gap-1">
-                  <span>🏆</span> ผลลัพธ์ที่คล้ายกันจาก Gemini
+                  <span>🏆</span> ผลลัพธ์ที่คล้ายกันจาก Pl@ntNet
                 </span>
                 <span className="text-[10px] text-amber-200/50">แตะเพื่อเลือก</span>
               </div>
@@ -240,19 +247,19 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
       </div>
 
       {/* Bottom Action Section */}
-      <footer className="w-full px-4 pt-2 pb-5 bg-gradient-to-t from-[#140a06] via-[#1a0f09] to-transparent flex flex-col items-center space-y-2 shrink-0">
+      <footer className="w-full px-3 pt-2 pb-3 bg-gradient-to-t from-[#140a06] via-[#1a0f09] to-transparent flex flex-col items-center space-y-2 shrink-0">
         {/* Primary Action Button: Confirm */}
         <button
           type="button"
           onClick={handleConfirm}
           disabled={isAnalyzing || (!selectedPlant.manual && (!identification.isPlant || !selectedPlant.scientificName))}
-          className="w-full py-3.5 px-6 emerald-btn rounded-2xl flex items-center justify-center space-x-2 text-white font-bold text-base shadow-lg cursor-pointer disabled:opacity-50"
+          className="w-full py-2.5 px-3 emerald-btn rounded-xl flex items-center justify-center space-x-2 text-white font-bold text-sm shadow-lg cursor-pointer disabled:opacity-50"
         >
           <svg className="w-5 h-5 text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-            ยืนยันเลือก {selectedPlant.name}
+            ยืนยันเลือกพืชนี้
           </span>
         </button>
 
