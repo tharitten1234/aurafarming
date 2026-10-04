@@ -91,6 +91,9 @@ export interface UserProfile {
   maxExp: number;
   coins: number;
   daysStreak: number;
+  bestCareStreak?: number;
+  plantsAdded?: number;
+  photosRecorded?: number;
   avatarUrl: string;
   plantCount: number;
   completedTasksCount: number;

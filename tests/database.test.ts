@@ -35,6 +35,7 @@ test('migration: ownership, scan validation, deterministic score, atomic rewards
     await pg.exec(await readFile(new URL('../supabase/migrations/20261002084821_security_indexes.sql', import.meta.url), 'utf8'));
     await pg.exec(await readFile(new URL('../supabase/migrations/20261002112622_friend_ui_features.sql', import.meta.url), 'utf8'));
     await pg.exec(await readFile(new URL('../supabase/migrations/20261002175154_farm_onboarding.sql', import.meta.url), 'utf8'));
+    await pg.exec(await readFile(new URL('../supabase/migrations/20261004192914_care_mission_rules.sql', import.meta.url), 'utf8'));
     const newcomer='99999999-9999-4999-8999-999999999999';
     await pg.query('insert into auth.users(id) values ($1)',[newcomer]);
     assert.equal((await pg.query<{farm_name:string|null}>('select farm_name from public.profiles where user_id=$1',[newcomer])).rows[0].farm_name,null,'Signup creates a profile before onboarding, without a fake farm name');
@@ -61,6 +62,13 @@ test('migration: ownership, scan validation, deterministic score, atomic rewards
     await pg.query("select public.set_mission_status($1,'completed')", [task]);
     await pg.query("select public.set_mission_status($1,'skipped')", [task]);
     assert.deepEqual(await profile(), afterComplete, 'Completed missions cannot be reopened or rewarded twice');
+    await assert.rejects(pg.query("select public.record_care($1,'water')", [plantId]),/Fresh dry soil check required/);
+    const soilTask=(await pg.query<{id:string}>("select id from public.user_missions where mission_id='moisture'")).rows[0].id;
+    await assert.rejects(pg.query("select public.set_mission_status($1,'completed')",[soilTask]),/Record soil check first/);
+    await pg.query("select public.record_care($1,'moist')",[plantId]);
+    assert.equal((await pg.query<{status:string}>('select status from public.user_missions where id=$1',[soilTask])).rows[0].status,'completed','Checking damp soil completes care without watering');
+    await assert.rejects(pg.query("select public.record_care($1,'water')",[plantId]),/Fresh dry soil check required/);
+    await pg.query("select public.record_care($1,'dry')",[plantId]);
     await pg.query("select public.record_care($1,'water')", [plantId]);
     const watered = await profile();
     await pg.query("select public.record_care($1,'water')", [plantId]);
@@ -69,9 +77,13 @@ test('migration: ownership, scan validation, deterministic score, atomic rewards
     const beforeGrowth = await profile();
     await pg.query('insert into public.growth_logs(user_id,plant_id,image_path,note) values ($1,$2,$3,$4)',
       [alice, plantId, `${alice}/growth/new.jpg`, 'ใบใหม่']);
-    assert.equal((await profile()).xp, beforeGrowth.xp + 40); // Log + one-time photo mission.
+    assert.equal((await profile()).xp, beforeGrowth.xp + 20); // Weekly photo mission, no duplicate upload reward.
     assert.equal((await profile()).streak, 1);
-    assert.equal((await profile()).aura_points,95,'Plant + three missions + growth + weekly bonus');
+    assert.equal((await profile()).aura_points,85,'Plant 20 + soil 10 + leaf 10 + photo 15 + weekly bonus 30');
+    const photoReward=await profile();
+    await pg.query('insert into public.growth_logs(user_id,plant_id,image_path,note) values ($1,$2,$3,$4)',[alice,plantId,`${alice}/growth/again.jpg`,'ภาพเพิ่ม']);
+    assert.deepEqual(await profile(),photoReward,'Additional uploads cannot farm Aura, XP or coins');
+    assert.equal((await profile()).aura_points,85,'Additional photos cannot farm weekly Aura');
     await pg.query('insert into storage.objects(bucket_id,name) values ($1,$2)', ['plant-images', path]);
     assert.equal((await pg.query('select * from storage.objects')).rows.length, 1);
     await assert.rejects(pg.exec('update public.profiles set xp=399'), /permission denied/);
@@ -89,7 +101,7 @@ test('migration: ownership, scan validation, deterministic score, atomic rewards
       [bob, plantId, `${bob}/growth/new.jpg`]), /foreign key|Active plant required/);
     await become(alice);
     assert.equal((await pg.query('select * from public.plants')).rows.length, 1, 'Saved plant still exists after changing sessions');
-    assert.equal((await pg.query('select * from public.growth_logs')).rows.length, 1);
+    assert.equal((await pg.query('select * from public.growth_logs')).rows.length, 2);
     const manual=(await pg.query<{id:string}>("select public.add_manual_plant('มอนสเตอร่า','Manual test','indoor','medium','Monstera deliciosa') as id")).rows[0].id;
     const added=(await pg.query<{source:string;aura_score:number}>('select source,aura_score from public.plants where id=$1',[manual])).rows[0];
     assert.equal(added.source,'manual');assert.equal(added.aura_score,100,'Catalog preferred indoor position');
@@ -113,6 +125,22 @@ test('migration: ownership, scan validation, deterministic score, atomic rewards
     assert.equal(weekly,3,'New week creates missions only for active plants');
     await pg.exec('select public.initialize_profile()');
     assert.equal((await pg.query("select * from public.user_missions where status='pending'")).rows.length,6,'Reinitialization does not duplicate missions');
+    const currentSoil=(await pg.query<{id:string}>("select id from public.user_missions where plant_id=$1 and mission_id='moisture' and week_start=(date_trunc('week',now() at time zone 'Asia/Bangkok'))::date",[plantId])).rows[0].id;
+    await pg.query("select public.set_mission_status($1,'postponed')",[currentSoil]);
+    await pg.query("select public.record_care($1,'wet')",[plantId]);
+    assert.equal((await pg.query<{status:string}>('select status from public.user_missions where id=$1',[currentSoil])).rows[0].status,'postponed','Early care does not override postponement');
+    await assert.rejects(pg.query("select public.set_mission_status($1,'completed')",[currentSoil]),/Mission not due/);
+    await pg.exec('reset role');await pg.query("update public.user_missions set due_at=now()-interval '1 hour' where id=$1",[currentSoil]);
+    await become(alice);await pg.exec('select public.initialize_profile()');
+    assert.equal((await pg.query<{status:string}>('select status from public.user_missions where id=$1',[currentSoil])).rows[0].status,'pending','Due postponement becomes actionable');
+    await pg.query("select public.set_mission_status($1,'skipped')",[currentSoil]);
+    await pg.query("select public.record_care($1,'moist')",[plantId]);
+    assert.equal((await pg.query<{status:string}>('select status from public.user_missions where id=$1',[currentSoil])).rows[0].status,'skipped','Soil check respects skipped mission');
+    await pg.exec('reset role');await pg.query('update public.profiles set streak=7 where user_id=$1',[alice]);
+    await pg.query("update public.profiles set streak=0,last_care_date=(now() at time zone 'Asia/Bangkok')::date-3 where user_id=$1",[alice]);
+    await become(alice);await pg.query("select public.record_care($1,'moist')",[plantId]);
+    const record=(await pg.query<{streak:number;best_care_streak:number}>('select streak,best_care_streak from public.profiles')).rows[0];
+    assert.equal(record.streak,1);assert.equal(record.best_care_streak,7,'Earned streak achievement persists after a break');
     await pg.exec('reset role');
     await pg.query("update public.plant_scans set status='not_plant', identification=$1", [JSON.stringify({ ...species, isPlant: false })]);
     await become(bob);

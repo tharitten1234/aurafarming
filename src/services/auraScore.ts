@@ -4,7 +4,7 @@ import { PLANT_DATABASE } from '../data/plantDatabase';
 
 export const lightLabels = { low: 'แสงน้อย', medium: 'แสงรำไร', high: 'แสงมาก แดดตรง', unknown: 'ยังไม่ทราบระดับแสง' };
 export const locationLabels = { indoor: 'ในห้อง', window: 'ริมหน้าต่าง', balcony: 'ระเบียง', porch: 'หน้าบ้าน' };
-export function calculateAuraScore(plant: Pick<PlantCandidate, 'sunlightRequirement'> & { scientificName?: string }, config: PlacementConfig) {
+export function calculatePlantMatchScore(plant: Pick<PlantCandidate, 'sunlightRequirement'> & { scientificName?: string }, config: PlacementConfig) {
   const lightLevels = { low: 0, medium: 1, high: 2 };
   const expected = plant.sunlightRequirement;
   if (expected === 'unknown') return {
@@ -26,4 +26,7 @@ export function calculateAuraScore(plant: Pick<PlantCandidate, 'sunlightRequirem
     `${location}ได้ ${posScore}/40 คะแนนจากเกณฑ์ตำแหน่ง (ยังไม่ได้วัดแสงจริง)`],
   };
 }
+
+// Compatibility with existing screens; this score is suitability, never accumulated Aura.
+export const calculateAuraScore=calculatePlantMatchScore;
 
