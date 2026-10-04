@@ -29,7 +29,7 @@ npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase db push
 ```
 
-3. In **Edge Functions → Secrets**, save `GEMINI_API_KEY`. Set `GEMINI_MODEL` if needed; the single default is `gemini-3.8-flash`. Do not send the key through chat or place it in frontend files. Alternatively copy `supabase/functions/.env.example` to the ignored `supabase/functions/.env.local`, enter the real values, and run:
+3. In **Edge Functions → Secrets**, save `PLANTNET_API_KEY` for image recognition and `GEMINI_API_KEY` for Thai names and care. The care model uses `GEMINI_CARE_MODEL`, then `GEMINI_MODEL`, then `gemini-3.8-flash`. Do not place either key in frontend files. Alternatively copy `supabase/functions/.env.example` to the ignored `supabase/functions/.env.local`, enter the real values, and run:
 
 ```powershell
 npx supabase secrets set --env-file supabase/functions/.env.local --project-ref YOUR_PROJECT_REF
@@ -46,7 +46,7 @@ Tables: `profiles`, `plants`, `plant_scans`, `growth_logs`, `missions`, `user_mi
 
 Private bucket: `plant-images`, max 5 MB, JPEG/PNG/WebP. Storage SELECT/INSERT/UPDATE/DELETE policies require the first path segment to equal auth.uid(). Paths are `{userId}/scans/...`, `/growth/...`, `/avatars/...`. Browser uploads are compressed to JPEG at max 1600 px. Photos display through signed links, refreshed before expiry. No public unrestricted uploads.
 
-Flow: camera/gallery → Storage → analyze-plant → Gemini structured JSON → saved scan → existing identification/placement/AuraScore screens → saved plant → Garden/Care/Missions/Growth/Profile. Non-plants and unnamed species cannot create a plant record. Alternatives include their own care requirements. AuraScore is deterministic and is recomputed in the database from validated scan requirements, placement and light.
+Flow: camera/gallery → Storage → analyze-plant → Pl@ntNet species and confidence → Gemini Thai names and species-specific care → saved scan → identification/placement/AuraScore → saved plant → Garden/Care/Missions/Growth/Profile. Gemini receives botanical names, not the image, and cannot change species or confidence. Non-plants bypass Gemini and cannot create a plant record. Alternatives include their own care requirements. Existing saved scans are not rewritten. AuraScore is deterministic and is recomputed in the database from validated scan requirements, placement and light.
 
 ## Verification
 
@@ -58,7 +58,7 @@ npm run check:edge
 npm run test:edge
 ```
 
-`npm test` exercises the actual PostgreSQL migration using PGlite with minimal test Auth/Storage schemas, RLS isolation, foreign-key ownership, duplicate rewards, AI validation and the camera component in a simulated DOM. Edge tests mock Supabase/Gemini HTTP responses and verify authentication/path validation, valid results, non-plants, malformed responses and upstream failures. These tests do not establish hosted Gemini success or physical camera compatibility.
+`npm test` exercises the actual PostgreSQL migration using PGlite with minimal test Auth/Storage schemas, RLS isolation, foreign-key ownership, duplicate rewards, AI validation and the camera component in a simulated DOM. Edge tests mock Supabase/Pl@ntNet/Gemini HTTP responses and verify authentication/path validation, provider roles, Thai names, unchanged species/confidence, non-plants and upstream failures. These tests do not establish hosted provider success or physical camera compatibility.
 
 `scripts/smoke-live.mjs` tests the configured hosted project with a separate anonymous user and a temporary image transport fixture; it removes the test image afterwards. Run only intentionally because it creates an anonymous test account. The fixture is not a plant recognition test.
 

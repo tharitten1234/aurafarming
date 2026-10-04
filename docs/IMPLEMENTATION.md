@@ -57,3 +57,11 @@ Camera lifecycle/fallback was tested with a simulated DOM; a physical phone came
 ## Run/configuration
 
 See README for local setup, the two VITE_SUPABASE_* variables, server-only GEMINI_API_KEY/GEMINI_MODEL, migration/deploy commands and HTTPS phone camera testing. No secrets were committed; this workspace has no Git repository initialized. Known seminar MVP limitations include one-time starter missions, no push notifications/account linking, optional growth AI assessment not implemented, and heuristic AuraScore rather than sensor measurements.
+
+## Provider roles synchronized — 2026-10-05
+
+Local files had reverted to the older Gemini image-analysis implementation. Retrieved the active analyze-plant version 15 from the existing Supabase project and restored its local handler and shared Pl@ntNet/Gemini-care modules. The deployed function already uses the requested roles, so no remote deployment or data changes were necessary.
+
+Pl@ntNet receives the JPEG and supplies species, alternatives and confidence. Gemini receives only botanical names, supplies Thai names and care, and must preserve exact scientific species and scores. New local tests verify both calls, ownership, quota, non-plants, Thai names, immutable scores/species and bounded transient retries. The client allows the combined provider deadline and retains distinct provider errors. UI recognition labels now say Pl@ntNet; Thai-name/care content identifies Gemini; manually selected care identifies the catalog.
+
+TypeScript, Vite production build, Deno checking, two hybrid Edge test groups and five existing app/database test groups passed. UI labels checked using a separate local fixture without creating accounts or uploading images. Fixture data is not a live recognition result. Existing saved scans were not rewritten.
