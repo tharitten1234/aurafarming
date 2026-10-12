@@ -132,12 +132,12 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
     return matchesLocation && matchesQuery;
   });
 
-  // 4 Terrace Pots coordinates matching the 683x1024 pixel art artwork
+  // Anchor each square hit area at the existing sprite baseline.
   const POT_ZONES = [
-    { left: '22%', top: '32%', width: '26%', height: '20%' }, // Top-Left: Dieffenbachia
-    { left: '52%', top: '32%', width: '26%', height: '20%' }, // Top-Right: Jasmine in blue pot
-    { left: '23%', top: '51%', width: '25%', height: '20%' }, // Bottom-Left: Cactus
-    { left: '52%', top: '51%', width: '26%', height: '20%' }, // Bottom-Right: Basil in wood crate
+    { left: '22%', top: '52%', width: '26%' },
+    { left: '52%', top: '52%', width: '26%' },
+    { left: '22%', top: '71%', width: '26%' },
+    { left: '52%', top: '71%', width: '26%' },
   ];
 
   return (
@@ -266,8 +266,8 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
       {POT_ZONES.map((zone,index)=> !plants[index] && <button
         key={`empty-${index}`} type="button" aria-label={`กระถางเปล่า ${index+1} เพิ่มพืช`}
         onClick={e=>{e.stopPropagation();sounds.playTap();onNavigate('scanner');}}
-        style={{left:zone.left,top:zone.top,width:zone.width,height:zone.height}}
-        className="absolute z-10 flex items-end justify-center cursor-pointer group">
+        style={{left:zone.left,top:zone.top,width:zone.width,transform:'translateY(-100%)'}}
+        className="absolute aspect-square z-10 flex items-end justify-center cursor-pointer group">
         <img src={ASSETS.emptyPot} alt={`กระถางเปล่า ช่อง ${index+1}`} className="w-[92%] h-[78%] object-contain pixelated drop-shadow-[0_8px_3px_rgba(57,28,7,0.25)] group-hover:brightness-110" />
       </button>)}
       {plants.slice(0, 4).map((plant, index) => {
@@ -284,19 +284,19 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
               left: zone.left,
               top: zone.top,
               width: zone.width,
-              height: zone.height,
+              transform: 'translateY(-100%)',
             }}
             onClick={(e) => {
               e.stopPropagation();
               sounds.playTap();
               setActiveMenuPlant(isMenuOpen ? null : plant);
             }}
-            className="absolute cursor-pointer z-20 flex items-center justify-center group"
+            className="absolute aspect-square cursor-pointer z-20 flex items-center justify-center group"
             role="button" tabIndex={0} aria-label={`ดูแล ${plant.nickname}`}
             onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setActiveMenuPlant(isMenuOpen?null:plant);}}}
           >
             {speciesKnown ? <div role="img" aria-label={plant.nickname} className="absolute bottom-0 w-full aspect-square pixelated pointer-events-none drop-shadow-[0_6px_3px_rgba(57,28,7,0.2)]" style={{backgroundImage:`url(${ASSETS.plantsAtlas})`,backgroundSize:'200% 200%',backgroundPosition:spritePosition}}/> : <img src={ASSETS.emptyPot} alt="กระถางที่ยังไม่ระบุชนิดพืช" className="absolute bottom-0 w-[92%] h-[78%] object-contain pixelated pointer-events-none" />}
-            <div className="absolute -top-2 bg-[#241107]/90 text-amber-100 px-2 rounded-lg text-[10px] max-w-full truncate">{plant.nickname}</div>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-[#241107]/90 text-amber-100 px-2 rounded-lg text-[10px] max-w-full truncate pointer-events-none">{plant.nickname}</div>
             {/* Subtle Hover Ring */}
             <div className="w-full h-full rounded-2xl group-hover:ring-2 group-hover:ring-amber-300/40 group-hover:bg-amber-300/5 transition-all" />
 
@@ -321,7 +321,7 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
             {isMenuOpen && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="absolute bottom-[-64px] sm:bottom-[-70px] left-1/2 -translate-x-1/2 w-44 bg-[#2b170c] border-2 border-[#f59e0b] rounded-xl p-2 shadow-2xl z-30 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-100"
+                className="absolute top-[calc(100%+28px)] left-1/2 -translate-x-1/2 w-44 bg-[#2b170c] border-2 border-[#f59e0b] rounded-xl p-2 shadow-2xl z-30 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-100"
               >
                 <div className="flex items-center justify-between border-b border-[#4d2a17] pb-1">
                   <span className="font-bold text-xs text-[#fedda0]">
