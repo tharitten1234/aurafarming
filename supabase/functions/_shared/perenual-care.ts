@@ -10,6 +10,7 @@ const detailSchema = speciesSchema.extend({
   care_level:z.string().nullable().optional(),
 });
 const cache = new Map<string,{expires:number; detail:z.infer<typeof detailSchema>|null}>();
+let unavailableUntil = 0;
 export class PerenualCareError extends Error {
   constructor(public code:string, public status=503, public retryAfterSeconds=60) {super(code);}
 }
@@ -50,10 +51,20 @@ async function lookup(name:string,key:string,signal:AbortSignal) {
 export async function enrichWithPerenual(identification:PlantIdentification, signal?:AbortSignal) {
   if(!identification.isPlant)return identification;
   const key=Deno.env.get('PERENUAL_API_KEY');
-  if(!key)throw new PerenualCareError('PERENUAL_CARE_CONFIGURATION');
   const deadline=signal??AbortSignal.timeout(30000);
+  let careUnavailable = !key || Date.now()<unavailableUntil;
   const enrich=async(candidate:PlantCandidate) => {
-    const detail=await lookup(candidate.scientificName,key,deadline);
+    let detail:z.infer<typeof detailSchema>|null=null;
+    if(!careUnavailable){
+      try {detail=await lookup(candidate.scientificName,key!,deadline);}
+      catch(error){
+        if(!(error instanceof PerenualCareError))throw error;
+        // Care is optional: preserve the successful identification even during provider outages.
+        careUnavailable=true;
+        unavailableUntil=Date.now()+error.retryAfterSeconds*1000;
+        console.warn('analyze-plant care unavailable',error.code);
+      }
+    }
     const watering=detail?.watering?.toLowerCase();
     const waterText:Record<string,string>={frequent:'ต้องการน้ำค่อนข้างมาก',average:'ต้องการน้ำปานกลาง',minimum:'ต้องการน้ำน้อย',none:'ฐานข้อมูลระบุว่าไม่ต้องให้น้ำ'};
     const sunlight=detail?.sunlight?.map(s=>s.toLowerCase())??[];
@@ -63,7 +74,7 @@ export async function enrichWithPerenual(identification:PlantIdentification, sig
     const difficulty=detail?.care_level?.toLowerCase();
     const thaiName=thaiPlantNames[normalize(candidate.scientificName)] ?? (/[\u0e01-\u0e5b]/.test(candidate.commonName)?candidate.commonName:'พืชที่ยังไม่มีชื่อไทยในฐานข้อมูล');
     return candidateSchema.parse({...candidate,commonName:thaiName,
-      description:detail?`ข้อมูลจาก Perenual: ${waterText[watering??'']??'ยังไม่มีข้อมูลปริมาณน้ำ'}; ${lightText[light]}. ตรวจความชื้นดินก่อนรดน้ำ ปรับตามสภาพแวดล้อมจริง`:'Perenual ไม่มีข้อมูลดูแลที่ตรงกับชนิดนี้ หรือข้อมูลอยู่นอกสิทธิ์แผนที่ใช้ กรุณาตรวจข้อมูลเฉพาะชนิดเพิ่มเติม',
+      description:detail?`ข้อมูลจาก Perenual: ${waterText[watering??'']??'ยังไม่มีข้อมูลปริมาณน้ำ'}; ${lightText[light]}. ตรวจความชื้นดินก่อนรดน้ำ ปรับตามสภาพแวดล้อมจริง`:careUnavailable?'Pl@ntNet ระบุชนิดพืชได้ แต่ Perenual ไม่พร้อมให้ข้อมูลดูแลชั่วคราว ตรวจความชื้นดินก่อนรดน้ำ และตรวจข้อมูลเฉพาะชนิดเพิ่มเติม':'Perenual ไม่มีข้อมูลดูแลที่ตรงกับชนิดนี้ หรือข้อมูลอยู่นอกสิทธิ์แผนที่ใช้ กรุณาตรวจข้อมูลเฉพาะชนิดเพิ่มเติม',
       wateringIntervalDays:null,sunlightRequirement:light,temperatureMinC:null,temperatureMaxC:null,
       careDifficulty:['easy','moderate','hard'].includes(difficulty??'')?difficulty:'unknown',
       warnings:careWarnings(candidate.scientificName,[...(!detail?['ยังไม่มีข้อมูลดูแลเฉพาะชนิดจาก Perenual']:[]),...(!thaiPlantNames[normalize(candidate.scientificName)]?['ยังไม่มีชื่อไทยที่ยืนยันได้ โปรดอ้างอิงชื่อวิทยาศาสตร์']:[])]),

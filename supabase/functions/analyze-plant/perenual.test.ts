@@ -1,4 +1,4 @@
-import { enrichWithPerenual, PerenualCareError } from '../_shared/perenual-care.ts';
+import { enrichWithPerenual } from '../_shared/perenual-care.ts';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
 Deno.test('Perenual: exact species, unknown care, quota and unchanged recognition', async()=>{
  const oldFetch=globalThis.fetch, oldKey=Deno.env.get('PERENUAL_API_KEY');
@@ -9,9 +9,8 @@ Deno.test('Perenual: exact species, unknown care, quota and unchanged recognitio
   const result=await enrichWithPerenual(identify('Exactus testus'));
   if(result.scientificName!=='Exactus testus'||result.confidence!==.42||result.sunlightRequirement!=='unknown'||result.wateringIntervalDays!==null)throw new Error('Recognition or unknown care changed');
   globalThis.fetch=async()=>new Response('quota',{status:429});
-  let guarded=false;
-  try {await enrichWithPerenual(identify('Quota testus'));}catch(e){guarded=e instanceof PerenualCareError&&e.code==='PERENUAL_CARE_RATE_LIMIT';}
-  if(!guarded)throw new Error('Quota not explained');
+  const limited=await enrichWithPerenual(identify('Quota testus'));
+  if(limited.confidence!==.42||limited.scientificName!=='Quota testus'||!limited.description.includes('ไม่พร้อม'))throw new Error('Care outage must preserve recognition');
   Deno.env.delete('PERENUAL_API_KEY');
   if((await enrichWithPerenual(normalizePlantnet({results:[]}).identification)).isPlant)throw new Error('Nonplant changed');
  }finally{globalThis.fetch=oldFetch; oldKey===undefined?Deno.env.delete('PERENUAL_API_KEY'):Deno.env.set('PERENUAL_API_KEY',oldKey);}

@@ -24,7 +24,7 @@ export async function analyzePlant(file: Blob) {
   } catch (error) {
     // Failed scans retain their server-side audit row; remove unused image on failure.
     await removeImage(imagePath).catch(() => undefined);
-    if (error instanceof Error && /^(วิเคราะห์|บริการ|เซสชัน|กรุณา|สแกน|Gemini|Pl@ntNet|โควตา)/.test(error.message)) throw error;
+    if (error instanceof Error && /^(วิเคราะห์|บริการ|เซสชัน|กรุณา|สแกน|Gemini|Perenual|Pl@ntNet|โควตา)/.test(error.message)) throw error;
     throw new Error('ผลวิเคราะห์ไม่สมบูรณ์ กรุณาถ่ายภาพใหม่');
   }
 }
