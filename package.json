@@ -10,7 +10,7 @@
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "check:edge": "deno check --config supabase/functions/analyze-plant/deno.json supabase/functions/analyze-plant/index.ts",
-    "test:edge": "deno test --allow-env --config supabase/functions/analyze-plant/deno.json supabase/functions/analyze-plant/index.test.ts"
+    "test:edge": "deno test --allow-env --config supabase/functions/analyze-plant/deno.json supabase/functions/analyze-plant/index.test.ts supabase/functions/analyze-plant/perenual.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",

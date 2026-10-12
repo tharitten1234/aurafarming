@@ -176,7 +176,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
 
             {(selectedPlant.manual || identification.isPlant) && selectedPlant.raw.description && (
               <section className="w-full rounded-xl border border-[#4d2a17] bg-[#23140c] p-3 text-xs text-[#eed9c4] leading-relaxed">
-                <h3 className="font-semibold text-[#fedda0] mb-1">🌱 {selectedPlant.manual ? 'คำแนะนำจากฐานข้อมูลพืช' : 'ชื่อไทยและคำแนะนำการดูแลจาก Gemini'}</h3>
+                <h3 className="font-semibold text-[#fedda0] mb-1">🌱 {selectedPlant.manual ? 'คำแนะนำจากฐานข้อมูลพืช' : 'ข้อมูลการดูแลจาก Perenual'}</h3>
                 <p>{selectedPlant.raw.description}</p>
               </section>
             )}

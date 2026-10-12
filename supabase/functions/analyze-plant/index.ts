@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
-import { enrichWithGemini, GeminiCareError } from '../_shared/gemini-care.ts';
+import { enrichWithPerenual, PerenualCareError } from '../_shared/perenual-care.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -88,10 +88,10 @@ export async function handleRequest(req: Request): Promise<Response> {
       throw new UpstreamError(response.status, Number.isFinite(retryAfter) ? Math.max(1,Math.min(86400,Math.ceil(retryAfter))) : 60);
     } else raw = await response.json();
     const {identification: recognized, response: audit} = normalizePlantnet(raw);
-    const identification = await enrichWithGemini(recognized);
+    const identification = await enrichWithPerenual(recognized);
     const status = !identification.isPlant ? 'not_plant' : identification.confidence < 0.6 ? 'uncertain' : 'completed';
     // Store validated fields only: no upstream query URLs, API keys or submitted bytes.
-    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:recognized.isPlant?'gemini':null} })
+    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:recognized.isPlant?'perenual':null} })
       .eq('id', scanId).eq('user_id', ownerId);
     if (error) throw new Error('database');
     return reply({ scanId, identification });
@@ -100,13 +100,13 @@ export async function handleRequest(req: Request): Promise<Response> {
     const category = error instanceof SyntaxError ? 'invalid-json' : error instanceof z.ZodError ? 'invalid-output' :
       error instanceof UpstreamError ? `upstream:${error.status}` : 'service-error';
     console.warn('analyze-plant failed', category);
-    if(error instanceof GeminiCareError){
+    if(error instanceof PerenualCareError){
       const messages:Record<string,string>={
-        GEMINI_CARE_CONFIGURATION:'Gemini สำหรับแปลชื่อและแนะนำการดูแลยังไม่พร้อม กรุณาตรวจคีย์และรุ่นโมเดลฝั่งเซิร์ฟเวอร์',
-        GEMINI_CARE_RATE_LIMIT:'Gemini สำหรับแปลชื่อและแนะนำการดูแลติดโควตา กรุณารอสักครู่แล้วลองใหม่',
-        GEMINI_CARE_TIMEOUT:'Gemini แปลชื่อและแนะนำการดูแลช้าเกินกำหนด กรุณาลองใหม่',
-        GEMINI_CARE_UNAVAILABLE:'Gemini สำหรับแปลชื่อและแนะนำการดูแลไม่พร้อมชั่วคราว กรุณาลองใหม่',
-        GEMINI_CARE_INVALID:'Gemini ส่งชื่อไทยหรือคำแนะนำไม่ครบ กรุณาลองสแกนใหม่',
+        PERENUAL_CARE_CONFIGURATION:'Perenual สำหรับข้อมูลดูแลพืชยังไม่พร้อม กรุณาตรวจAPI keyฝั่งเซิร์ฟเวอร์',
+        PERENUAL_CARE_RATE_LIMIT:'Perenual สำหรับข้อมูลดูแลพืชติดโควตา กรุณารอสักครู่แล้วลองใหม่',
+        PERENUAL_CARE_TIMEOUT:'Perenual ดึงข้อมูลดูแลพืชช้าเกินกำหนด กรุณาลองใหม่',
+        PERENUAL_CARE_UNAVAILABLE:'Perenual สำหรับข้อมูลดูแลพืชไม่พร้อมชั่วคราว กรุณาลองใหม่',
+        PERENUAL_CARE_INVALID:'Perenual ส่งข้อมูลดูแลไม่ถูกต้อง กรุณาลองสแกนใหม่',
       };
       return reply({code:error.code,error:messages[error.code],retryAfterSeconds:error.retryAfterSeconds},error.status);
     }
@@ -122,4 +122,3 @@ export async function handleRequest(req: Request): Promise<Response> {
 }
 
 if (import.meta.main) Deno.serve(handleRequest);
-
