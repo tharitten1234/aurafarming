@@ -5,12 +5,12 @@ import { uploadImage, signedImage, removeImage } from './images';
 let retryNotBefore = 0;
 const failureMessages:Record<string,string>={PLANTNET_UNAVAILABLE:'Pl@ntNet ไม่พร้อมใช้งานชั่วคราว กรุณาลองใหม่ใน 30 วินาที',PLANTNET_TIMEOUT:'Pl@ntNet ตอบช้าเกินกำหนด กรุณาลองใหม่ใน 30 วินาที',PLANTNET_CONFIGURATION:'Pl@ntNet ปฏิเสธสิทธิ์ของเซิร์ฟเวอร์ กรุณาตรวจ API key และการตั้งค่าบัญชี Pl@ntNet'};
 
-export async function analyzePlant(file: Blob) {
+export async function analyzePlant(file: Blob,careSource?:'demo-dataset') {
   if(Date.now()<retryNotBefore)throw new Error(`กรุณารอ ${Math.ceil((retryNotBefore-Date.now())/1000)} วินาทีก่อนสแกนใหม่`);
   const imagePath = await uploadImage(file, 'scans');
   try {
     const image = await signedImage(imagePath);
-    const { data, error } = await db().functions.invoke('analyze-plant', { body: { imagePath }, timeout: 85000 });
+    const { data, error } = await db().functions.invoke('analyze-plant', { body: { imagePath,...(careSource?{careSource}:{}) }, timeout: 85000 });
     if (error) {
       const failure = error.context instanceof Response ? await error.context.json().catch(()=>null) : null;
       const seconds = typeof failure?.retryAfterSeconds==='number' ? Math.max(1,Math.min(86400,failure.retryAfterSeconds)) : 0;

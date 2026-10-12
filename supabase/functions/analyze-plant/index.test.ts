@@ -18,6 +18,7 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Peren
   let upstream:unknown=recognition;
   globalThis.fetch=async(input,init)=>{
     const url=String(input);
+    if(url.includes('/rest/v1/demo_plant_care'))return json([{scientific_name:'Selaginella kraussiana',aliases:[],care:advice('Selaginella kraussiana')},{scientific_name:'Buxus sempervirens',aliases:[],care:advice('Buxus sempervirens')}]);
     if(url.includes('/auth/v1/user'))return json({id:owner,aud:'authenticated',role:'authenticated'});
     if(url.includes('/storage/v1/object/'))return new Response(new Uint8Array([255,216,255,217]));
     if(url.includes('/rest/v1/plant_scans')){
@@ -43,7 +44,7 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Peren
     }
     throw new Error('Unexpected request');
   };
-  const request=(path=imagePath,auth=true)=>new Request('https://edge.test/',{method:'POST',headers:auth?{Authorization:'Bearer test-token'}:{},body:JSON.stringify({imagePath:path})});
+  const request=(path=imagePath,auth=true,careSource?:string)=>new Request('https://edge.test/',{method:'POST',headers:auth?{Authorization:'Bearer test-token'}:{},body:JSON.stringify({imagePath:path,...(careSource?{careSource}:{})})});
   try{
     assert((await handleRequest(request(imagePath,false))).status===401,'Missing auth');
     assert((await handleRequest(request('other/scans/test.jpg'))).status===403,'Foreign image');
@@ -53,6 +54,9 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Peren
     assert(/[\u0e01-\u0e5b]/.test(result.identification.commonName) && result.identification.confidence===.09,'Thai name, original Pl@ntNet confidence');
     assert(result.identification.scientificName==='Selaginella kraussiana' && result.identification.alternativeCandidates[0].confidence===.03,'Original species and alternatives');
     assert(stored.status==='uncertain' && stored.raw_response.careProvider==='perenual','Low confidence and care provenance');
+    const datasetResult=await (await handleRequest(request(imagePath,true,'demo-dataset'))).json();
+    assert(datasetResult.identification.confidence===.09 && datasetResult.identification.scientificName==='Selaginella kraussiana' && geminiCalls===4,'Dataset preserves live scores and does not call Perenual');
+    assert(stored.raw_response.careProvider==='supabase-dataset','Dataset provenance stored');
     upstream={results:[]};const empty=await (await handleRequest(request())).json();assert(!empty.identification.isPlant && geminiCalls===4,'Non-plants skip Perenual');
     providerStatus=404;upstream={message:'Species not found'};assert(!(await (await handleRequest(request())).json()).identification.isPlant,'Provider non-plant rejection');
     providerStatus=429;assert((await handleRequest(request())).status===429 && stored.status==='failed','Provider quota recorded');

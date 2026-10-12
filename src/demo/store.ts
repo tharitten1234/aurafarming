@@ -3,7 +3,8 @@ import {calculatePlantMatchScore,lightLabels,locationLabels} from '../services/a
 import {emptyProfile} from '../services/profile';
 import {missionCare,bangkokDate} from '../services/careRules';
 
-export const isDemo = typeof window!=='undefined' && new URLSearchParams(window.location.search).get('demo')==='1';
+export const isDemo = typeof window!=='undefined' && ['1','offline'].includes(new URLSearchParams(window.location.search).get('demo')??'');
+export const isOfflineDemo = isDemo && new URLSearchParams(window.location.search).get('demo')==='offline';
 const KEY='aurafarming.presentation.v1';
 const rows = [
  ['monstera','มอนสเตอร่า','Monstera deliciosa','medium','ตรวจดินชั้นบนให้แห้งก่อนรดน้ำ ใช้ดินระบายน้ำดีและแสงสว่างที่กรองแล้ว'],
@@ -37,7 +38,7 @@ export const demo={
  async listGrowthLogs(){return structuredClone(get().photos);},
  async loadProfile(_plants:number,_tasks:number){const u=get().user;return {...u,plantCount:get().plants.length,level:Math.floor(u.auraScore/150)+1,exp:u.auraScore%150,maxExp:150};},
  async addManualPlant(name:string,nickname:string,config:PlacementConfig,scientificName?:string){const species=demoSpecies.find(s=>s.candidate.scientificName===scientificName||s.candidate.commonName===name);if(!species)throw new Error('โหมดสาธิตรองรับพืช 5 ชนิดที่เตรียมไว้');const p=makePlant(species.candidate,config,species.image);p.nickname=nickname;get().plants.push(p);get().tasks.push(...missions(p));get().user.plantsAdded=(get().user.plantsAdded??0)+1;get().user.auraScore+=15;persist();},
- async savePlant(scan:ScanResult,candidate:PlantCandidate,config:PlacementConfig){await demo.addManualPlant(candidate.commonName,candidate.commonName,config,candidate.scientificName);get().plants.at(-1)!.image=scan.image;persist();},
+ async savePlant(scan:ScanResult,candidate:PlantCandidate,config:PlacementConfig){const p=makePlant(candidate,config,scan.image);get().plants.push(p);get().tasks.push(...missions(p));get().user.plantsAdded=(get().user.plantsAdded??0)+1;get().user.auraScore+=20;persist();},
  async renamePlant(id:string,name:string){plant(id).nickname=name;for(const t of get().tasks.filter(t=>t.plantId===id))t.plantName=name;persist();},
  async movePlant(id:string,location:string,sunlight:string){const p=plant(id);p.location=location;p.sunlight=sunlight;const config={location:(Object.entries(locationLabels).find(([,v])=>v===location)?.[0]??'window') as PlacementConfig['location'],light:(/น้อย/.test(sunlight)?'low':/มาก/.test(sunlight)?'high':'medium') as PlacementConfig['light']};p.auraScore=p.plantMatchScore=calculatePlantMatchScore(p.identification!,config).totalScore;persist();},
  async archivePlant(id:string){get().plants=get().plants.filter(p=>p.id!==id);get().tasks=get().tasks.filter(t=>t.plantId!==id);persist();},

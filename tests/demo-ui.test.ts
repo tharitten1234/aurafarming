@@ -4,7 +4,7 @@ import React,{act} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Window} from 'happy-dom';
 test('Demo UI: starts without Auth/network, selects prepared example and navigates',async()=>{
- const browser=new Window({url:'http://localhost:3000/?demo=1'});
+ const browser=new Window({url:'http://localhost:3000/?demo=offline'});
  for(const [key,value] of Object.entries({window:browser,document:browser.document,navigator:browser.navigator,localStorage:browser.localStorage,sessionStorage:browser.sessionStorage,HTMLElement:browser.HTMLElement,IS_REACT_ACT_ENVIRONMENT:true}))Object.defineProperty(globalThis,key,{value,writable:true,configurable:true});
  const oldFetch=globalThis.fetch;let calls=0;
  globalThis.fetch=async()=>{calls++;throw new Error('No network in demo');};

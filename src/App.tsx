@@ -7,12 +7,12 @@ import {
   TimelinePhoto,
 } from './types';
 import type { Task, ScanResult, PlantCandidate } from './types';
-import { ensureSession } from './services/auth';
+import { startGuestSession, ensureSession } from './services/auth';
 import { db, isConfigured, message } from './services/supabase';
 import { analyzePlant } from './services/scans';
 import { placementFromLabels } from './services/plants';
 import {listPlants,savePlant,renamePlant,recordCare,addManualPlant,movePlant,archivePlant,listMissions,updateMission,listGrowthLogs,addGrowthLog,loadProfile,updateDisplayName} from './demo/runtime';
-import {demo,isDemo,demoSpecies} from './demo/store';
+import {demo,isDemo,isOfflineDemo,demoSpecies} from './demo/store';
 import { emptyProfile, deriveBadges } from './services/profile';
 import { sounds } from './utils/soundEffects';
 import { Navigation } from './components/Navigation';
@@ -118,7 +118,9 @@ export default function App() {
     const epoch = ++scanEpoch.current;
     actionLock.current = true; setBusy(true);
     try {
-      const result = await analyzePlant(file);
+      if(isDemo)await startGuestSession();
+      const result = await analyzePlant(file,isDemo?'demo-dataset':undefined);
+      if(isDemo){result.image=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('อ่านภาพไม่ได้'));reader.readAsDataURL(file);});}
       if (epoch !== scanEpoch.current) return;
       setScan(result); setManualChoice(false); setStagedPlant(result.identification); setCurrentScreen('identify');
     } catch (e) { if (epoch === scanEpoch.current) showToast(message(e), '⚠️'); }
@@ -168,7 +170,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0e0704] flex items-center justify-center p-0 sm:p-4 text-[#faebd7]">
-      {isDemo && <aside className="fixed top-0 left-0 right-0 z-50 bg-amber-200 text-stone-900 text-center text-xs py-1">โหมดสาธิต • ข้อมูลตัวอย่างในเครื่อง • <a className="underline" href="/">กลับระบบจริง</a></aside>}
+      {isDemo && <aside className="fixed top-0 left-0 right-0 z-50 bg-amber-200 text-stone-900 text-center text-xs py-1">โหมดสาธิต • {isOfflineDemo?"ข้อมูลตัวอย่างในเครื่อง":"Pl@ntNet สด / ข้อมูลดูแล Supabase"} • <a className="underline" href="/">กลับระบบจริง</a></aside>}
       {/* Toast Feedback */}
       <Toast message={toast.message} icon={toast.icon} />
 
@@ -201,7 +203,7 @@ export default function App() {
         )}
 
         {/* SCREEN 2: Camera Scanner */}
-        {currentScreen === 'scanner' && !isDemo && (
+        {currentScreen === 'scanner' && !isOfflineDemo && (
           <ScannerScreen
             onBack={() => { scanEpoch.current++; setCurrentScreen('garden'); }}
             onScanComplete={handleScan}
@@ -209,7 +211,7 @@ export default function App() {
           />
         )}
 
-        {currentScreen==='scanner' && isDemo && <section className="overflow-y-auto p-4 space-y-3"><button className="wood-box p-3 rounded-lg" onClick={()=>setCurrentScreen('garden')}>← กลับสวน</button><h2>เลือกพืชตัวอย่าง — ไม่ใช่การวิเคราะห์ภาพสด</h2>{demoSpecies.map(species=><button key={species.id} className="wood-box rounded-xl p-3 flex items-center gap-3 w-full" onClick={()=>{const result={...species.candidate,isPlant:true,alternativeCandidates:[]};setScan({scanId:'demo-'+species.id,imagePath:species.image,image:species.image,identification:result});setStagedPlant(result);setManualChoice(false);setCurrentScreen('identify');}}><img src={species.image} alt={species.candidate.commonName} className="w-16 h-20"/><span>{species.candidate.commonName}<br/><small>{species.candidate.scientificName}</small></span></button>)}</section>}
+        {currentScreen==='scanner' && isOfflineDemo && <section className="overflow-y-auto p-4 space-y-3"><button className="wood-box p-3 rounded-lg" onClick={()=>setCurrentScreen('garden')}>← กลับสวน</button><h2>เลือกพืชตัวอย่าง — ไม่ใช่การวิเคราะห์ภาพสด</h2>{demoSpecies.map(species=><button key={species.id} className="wood-box rounded-xl p-3 flex items-center gap-3 w-full" onClick={()=>{const result={...species.candidate,isPlant:true,alternativeCandidates:[]};setScan({scanId:'demo-'+species.id,imagePath:species.image,image:species.image,identification:result});setStagedPlant(result);setManualChoice(false);setCurrentScreen('identify');}}><img src={species.image} alt={species.candidate.commonName} className="w-16 h-20"/><span>{species.candidate.commonName}<br/><small>{species.candidate.scientificName}</small></span></button>)}</section>}
         {/* SCREEN 3: Plant Identification Result ("ใช่ต้นนี้ไหม?") */}
         {currentScreen === 'identify' && scan && (
           <IdentifyScreen
