@@ -1,0 +1,18 @@
+import {demo,isDemo} from './store';
+import * as plants from '../services/plants';
+export const listPlants: typeof plants.listPlants = (...args) => isDemo ? demo.listPlants(...args) : plants.listPlants(...args);
+export const savePlant: typeof plants.savePlant = (...args) => isDemo ? demo.savePlant(...args) : plants.savePlant(...args);
+export const renamePlant: typeof plants.renamePlant = (...args) => isDemo ? demo.renamePlant(...args) : plants.renamePlant(...args);
+export const recordCare: typeof plants.recordCare = (...args) => isDemo ? demo.recordCare(...args) : plants.recordCare(...args);
+export const addManualPlant: typeof plants.addManualPlant = (...args) => isDemo ? demo.addManualPlant(...args) : plants.addManualPlant(...args);
+export const movePlant: typeof plants.movePlant = (...args) => isDemo ? demo.movePlant(...args) : plants.movePlant(...args);
+export const archivePlant: typeof plants.archivePlant = (...args) => isDemo ? demo.archivePlant(...args) : plants.archivePlant(...args);
+import * as missions from '../services/missions';
+export const listMissions: typeof missions.listMissions = (...args) => isDemo ? demo.listMissions(...args) : missions.listMissions(...args);
+export const updateMission: typeof missions.updateMission = (...args) => isDemo ? demo.updateMission(...args) : missions.updateMission(...args);
+import * as growthLogs from '../services/growthLogs';
+export const listGrowthLogs: typeof growthLogs.listGrowthLogs = (...args) => isDemo ? demo.listGrowthLogs(...args) : growthLogs.listGrowthLogs(...args);
+export const addGrowthLog: typeof growthLogs.addGrowthLog = (...args) => isDemo ? demo.addGrowthLog(...args) : growthLogs.addGrowthLog(...args);
+import * as profile from '../services/profile';
+export const loadProfile: typeof profile.loadProfile = (...args) => isDemo ? demo.loadProfile(...args) : profile.loadProfile(...args);
+export const updateDisplayName: typeof profile.updateDisplayName = (...args) => isDemo ? demo.updateDisplayName(...args) : profile.updateDisplayName(...args);

@@ -10,10 +10,10 @@ import type { Task, ScanResult, PlantCandidate } from './types';
 import { ensureSession } from './services/auth';
 import { db, isConfigured, message } from './services/supabase';
 import { analyzePlant } from './services/scans';
-import { listPlants, savePlant, renamePlant, recordCare, addManualPlant, placementFromLabels, movePlant, archivePlant } from './services/plants';
-import { listMissions, updateMission } from './services/missions';
-import { listGrowthLogs, addGrowthLog } from './services/growthLogs';
-import { emptyProfile, loadProfile, deriveBadges, updateDisplayName } from './services/profile';
+import { placementFromLabels } from './services/plants';
+import {listPlants,savePlant,renamePlant,recordCare,addManualPlant,movePlant,archivePlant,listMissions,updateMission,listGrowthLogs,addGrowthLog,loadProfile,updateDisplayName} from './demo/runtime';
+import {demo,isDemo,demoSpecies} from './demo/store';
+import { emptyProfile, deriveBadges } from './services/profile';
 import { sounds } from './utils/soundEffects';
 import { Navigation } from './components/Navigation';
 import { Toast } from './components/Toast';
@@ -30,7 +30,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { FarmSetupScreen } from './components/FarmSetupScreen';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('login');
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(isDemo?'garden':'login');
   const [user, setUser] = useState<UserProfile>(emptyProfile);
   const [plants, setPlants] = useState<Plant[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -59,6 +59,7 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast({ message: null }), 5000);
   };
   const reload = async () => {
+    if(isDemo){const [p,t,photos]=await Promise.all([listPlants(),listMissions(),listGrowthLogs()]);const u=await loadProfile(p.length,t.filter(x=>x.isCompleted).length);setPlants(p);setTasks(t);setTimelinePhotos(photos.filter(photo=>p.some(plant=>plant.id===photo.plantId)));setUser(u);return u;}
     const session=await ensureSession();const epoch=identityEpoch.current;
     const {error} = await db().rpc('initialize_profile');
     if(error) throw new Error('โหลดข้อมูลสวนไม่สำเร็จ');
@@ -72,6 +73,7 @@ export default function App() {
   const initialize = async () => {
     const ticket=++initialization.current;
     setLoading(true); setLoadError(null);
+    if(isDemo){await reload();setCurrentScreen('garden');setLoading(false);return;}
     try {
       const {data,error}=await db().auth.getSession();
       if(ticket!==initialization.current)return;
@@ -85,7 +87,7 @@ export default function App() {
   };
   useEffect(() => {
     void initialize();
-    if(!isConfigured)return;
+    if(isDemo||!isConfigured)return;
     const {data:{subscription}}=db().auth.onAuthStateChange((event,session)=>{
       if(identity.current!== (session?.user.id??null)){identity.current=session?.user.id??null;identityEpoch.current++;initialization.current++;clearGarden();setCurrentScreen('login');}
       if(event==='SIGNED_OUT'){setCurrentScreen('login');setLoadError(null);setLoading(false);}
@@ -148,13 +150,14 @@ export default function App() {
     finally{actionLock.current=false;setBusy(false);}
   };
   const handleLogout = async () => {
+    if(isDemo){window.location.search='';return;}
     if(actionLock.current)return;
     const {data}=await db().auth.getSession();
     // Keep the guest identity so the Guest button restores the same garden.
     if(!data.session?.user.is_anonymous){const {error}=await db().auth.signOut({scope:'local'});if(error){showToast('ออกจากระบบไม่สำเร็จ กรุณาลองใหม่','⚠️');return;}}
     setCurrentScreen('login');
   };
-  const handleResetData = async () => { await initialize(); };
+  const handleResetData = async () => { if(isDemo)demo.reset();await initialize(); };
 
   // Screens that show the persistent bottom navigation bar
   const showNav = ['garden', 'missions', 'timeline', 'profile'].includes(
@@ -165,6 +168,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0e0704] flex items-center justify-center p-0 sm:p-4 text-[#faebd7]">
+      {isDemo && <aside className="fixed top-0 left-0 right-0 z-50 bg-amber-200 text-stone-900 text-center text-xs py-1">โหมดสาธิต • ข้อมูลตัวอย่างในเครื่อง • <a className="underline" href="/">กลับระบบจริง</a></aside>}
       {/* Toast Feedback */}
       <Toast message={toast.message} icon={toast.icon} />
 
@@ -197,7 +201,7 @@ export default function App() {
         )}
 
         {/* SCREEN 2: Camera Scanner */}
-        {currentScreen === 'scanner' && (
+        {currentScreen === 'scanner' && !isDemo && (
           <ScannerScreen
             onBack={() => { scanEpoch.current++; setCurrentScreen('garden'); }}
             onScanComplete={handleScan}
@@ -205,6 +209,7 @@ export default function App() {
           />
         )}
 
+        {currentScreen==='scanner' && isDemo && <section className="overflow-y-auto p-4 space-y-3"><button className="wood-box p-3 rounded-lg" onClick={()=>setCurrentScreen('garden')}>← กลับสวน</button><h2>เลือกพืชตัวอย่าง — ไม่ใช่การวิเคราะห์ภาพสด</h2>{demoSpecies.map(species=><button key={species.id} className="wood-box rounded-xl p-3 flex items-center gap-3 w-full" onClick={()=>{const result={...species.candidate,isPlant:true,alternativeCandidates:[]};setScan({scanId:'demo-'+species.id,imagePath:species.image,image:species.image,identification:result});setStagedPlant(result);setManualChoice(false);setCurrentScreen('identify');}}><img src={species.image} alt={species.candidate.commonName} className="w-16 h-20"/><span>{species.candidate.commonName}<br/><small>{species.candidate.scientificName}</small></span></button>)}</section>}
         {/* SCREEN 3: Plant Identification Result ("ใช่ต้นนี้ไหม?") */}
         {currentScreen === 'identify' && scan && (
           <IdentifyScreen

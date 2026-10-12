@@ -1,3 +1,4 @@
+import {isDemo} from '../demo/store';
 import React, {useState} from 'react';
 import {ASSETS} from '../data/mockData';
 import {PLANT_DATABASE} from '../data/plantDatabase';
@@ -10,7 +11,7 @@ type DisplayCandidate={name:string;scientificName:string;confidence:number;confi
 const display=(raw:PlantCandidate,manual=false):DisplayCandidate=>({name:raw.commonName,scientificName:raw.scientificName,confidence:Math.round(raw.confidence*100),confidenceText:manual?'ผู้ใช้เลือกเอง':Math.round(raw.confidence*100)+'%',features:candidateFeatures(raw),raw,manual});
 export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:identification,onBack,onConfirm,onRetake,onShowToast})=>{
  const isAnalyzing=false;
- const result={primary:display(identification),alternatives:identification.alternativeCandidates.map(p=>display(p)),isUnclear:identification.confidence<.6,unclearReason:identification.isPlant?'Pl@ntNet ให้ความมั่นใจต่ำ กรุณาถ่ายใบหรือดอกให้ชัดขึ้น และตรวจชนิดพืชก่อนใช้คำแนะนำการดูแล':'ภาพนี้ไม่พบพืช กรุณาถ่ายภาพใหม่'};
+ const result={primary:display(identification,isDemo),alternatives:identification.alternativeCandidates.map(p=>display(p)),isUnclear:identification.confidence<.6,unclearReason:identification.isPlant?'Pl@ntNet ให้ความมั่นใจต่ำ กรุณาถ่ายใบหรือดอกให้ชัดขึ้น และตรวจชนิดพืชก่อนใช้คำแนะนำการดูแล':'ภาพนี้ไม่พบพืช กรุณาถ่ายภาพใหม่'};
  const [selectedPlant,setSelectedPlant]=useState<DisplayCandidate>(result.primary);
  const [showSearchModal,setShowSearchModal]=useState(false),[searchQuery,setSearchQuery]=useState('');
  const handleConfirm=()=>{if(!selectedPlant.manual&&(!identification.isPlant||!selectedPlant.scientificName))return;onConfirm(selectedPlant.raw,selectedPlant.manual);};
@@ -51,7 +52,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
         {/* Recognition provider */}
         <div className="px-2 py-1 bg-[#12281a] border border-[#235e38] rounded-xl flex items-center gap-1 text-[10px] text-[#8bf7be]">
           <span>🌿</span>
-          <span className="font-semibold">Pl@ntNet</span>
+          <span className="font-semibold">{isDemo?"DEMO":"Pl@ntNet"}</span>
         </div>
       </header>
 
@@ -176,7 +177,7 @@ export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:
 
             {(selectedPlant.manual || identification.isPlant) && selectedPlant.raw.description && (
               <section className="w-full rounded-xl border border-[#4d2a17] bg-[#23140c] p-3 text-xs text-[#eed9c4] leading-relaxed">
-                <h3 className="font-semibold text-[#fedda0] mb-1">🌱 {selectedPlant.manual ? 'คำแนะนำจากฐานข้อมูลพืช' : 'ข้อมูลการดูแลจาก Perenual'}</h3>
+                <h3 className="font-semibold text-[#fedda0] mb-1">🌱 {selectedPlant.manual ? 'คำแนะนำจากฐานข้อมูลพืช' : isDemo?'ข้อมูลดูแลที่เตรียมไว้สำหรับสาธิต':'ข้อมูลการดูแลจาก Perenual'}</h3>
                 <p>{selectedPlant.raw.description}</p>
               </section>
             )}
