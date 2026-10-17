@@ -1,5 +1,11 @@
-import { enrichWithPerenual } from '../_shared/perenual-care.ts';
+import { enrichWithPerenual,perenualRetryAfter } from '../_shared/perenual-care.ts';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
+Deno.test('Perenual Retry-After handles numeric seconds, HTTP dates, invalid and bounded values',()=>{
+ const now=Date.parse('2026-10-17T00:00:00Z');
+ for(const [input,expected] of [[null,60],['',60],['90',90],['-1',1],['999999',86400],['invalid',60],['Sat, 17 Oct 2026 00:02:00 GMT',120]] as const){
+  if(perenualRetryAfter(input,now)!==expected)throw new Error(`Incorrect retry delay: ${input}`);
+ }
+});
 Deno.test('Perenual: exact species, unknown care, quota and unchanged recognition', async()=>{
  const oldFetch=globalThis.fetch, oldKey=Deno.env.get('PERENUAL_API_KEY');
  Deno.env.set('PERENUAL_API_KEY','test-only');

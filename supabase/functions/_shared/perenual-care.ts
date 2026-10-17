@@ -15,6 +15,12 @@ export class PerenualCareError extends Error {
   constructor(public code:string, public status=503, public retryAfterSeconds=60) {super(code);}
 }
 const normalize = (name:string) => name.trim().replace(/\s+/g,' ').toLowerCase();
+export function perenualRetryAfter(value:string|null,now=Date.now()) {
+  if(!value?.trim())return 60;
+  const numeric=Number(value);
+  const seconds=Number.isFinite(numeric)?numeric:(Date.parse(value)-now)/1000;
+  return Number.isFinite(seconds)?Math.max(1,Math.min(86400,Math.ceil(seconds))):60;
+}
 
 async function lookup(name:string,key:string,signal:AbortSignal) {
   const normalized=normalize(name);
@@ -27,7 +33,7 @@ async function lookup(name:string,key:string,signal:AbortSignal) {
     let response:Response;
     try {response=await fetch(url,{signal});}
     catch {throw new PerenualCareError(signal.aborted?'PERENUAL_CARE_TIMEOUT':'PERENUAL_CARE_UNAVAILABLE',signal.aborted?504:503);}
-    if(response.status===429)throw new PerenualCareError('PERENUAL_CARE_RATE_LIMIT',429);
+    if(response.status===429)throw new PerenualCareError('PERENUAL_CARE_RATE_LIMIT',429,perenualRetryAfter(response.headers.get('Retry-After')));
     if([401,403].includes(response.status))throw new PerenualCareError('PERENUAL_CARE_CONFIGURATION');
     if(response.status===404)return null;
     if(!response.ok)throw new PerenualCareError('PERENUAL_CARE_UNAVAILABLE');
@@ -51,7 +57,8 @@ async function lookup(name:string,key:string,signal:AbortSignal) {
 export async function enrichWithPerenual(identification:PlantIdentification, signal?:AbortSignal) {
   if(!identification.isPlant)return identification;
   const key=Deno.env.get('PERENUAL_API_KEY');
-  const deadline=signal??AbortSignal.timeout(30000);
+  // Recognition already succeeded; optional care must not consume the client's remaining scan timeout.
+  const deadline=signal?AbortSignal.any([signal,AbortSignal.timeout(8000)]):AbortSignal.timeout(8000);
   let careUnavailable = !key || Date.now()<unavailableUntil;
   const enrich=async(candidate:PlantCandidate) => {
     let detail:z.infer<typeof detailSchema>|null=null;

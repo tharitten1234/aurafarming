@@ -16,7 +16,7 @@ export const LoginScreen:React.FC<LoginScreenProps>=({onLoginSuccess,onShowToast
   setEmail('');setPassword('');setEmailCode('');setShowPassword(false);setIsSignUp(signUp);
  };
  useEffect(()=>{if(!isConfigured)return;const restore=(session:Session|null)=>{if(sessionStorage.getItem('aurafarming.pending-password')===session?.user.id&&session?.user.email_confirmed_at){setPasswordSetup(true);setIsSignUp(true);setEmail(session.user.email??'');}};void db().auth.getSession().then(({data})=>restore(data.session));const {data}=db().auth.onAuthStateChange((_event,session)=>restore(session));return()=>data.subscription.unsubscribe();},[]);
- useEffect(()=>{let active=true;const env=import.meta.env;void fetch(`${env.VITE_SUPABASE_URL}/auth/v1/settings`,{headers:{apikey:env.VITE_SUPABASE_PUBLISHABLE_KEY}}).then(r=>r.json()).then(data=>{if(active)setGoogleEnabled(data.external?.google===true);}).catch(()=>undefined);return()=>{active=false;};},[]);
+ useEffect(()=>{if(!isConfigured)return;let active=true;const env=import.meta.env;void fetch(`${env.VITE_SUPABASE_URL}/auth/v1/settings`,{headers:{apikey:env.VITE_SUPABASE_PUBLISHABLE_KEY}}).then(r=>r.json()).then(data=>{if(active)setGoogleEnabled(data.external?.google===true);}).catch(()=>undefined);return()=>{active=false;};},[]);
  const perform=async(action:()=>Promise<void>)=>{if(isLoading)return;setIsLoading(true);try{await action();}catch(e){onShowToast(e instanceof Error?e.message:'เข้าสู่ระบบไม่สำเร็จ','⚠️');}finally{setIsLoading(false);}};
  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault();void perform(async()=>{
   const client=db();
