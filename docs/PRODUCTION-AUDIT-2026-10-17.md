@@ -27,4 +27,4 @@ TypeScript, production build, nine local test groups and seven Edge test groups 
 
 ## Deployment
 
-The attempted production deploy was rejected by automatic approval review pending explicit authorization for this revision. The last hosted function remains unchanged. The prepared deployment replaces only perenual-care.ts inside the retrieved hosted bundle, preserving the existing Demo dataset route and its authentication behavior. Do not blindly deploy the train-ai2 directory over the shared function: the hosted bundle also supports Demo requests.
+After automatic approval review rejected the attempted production deployment, the user explicitly chose to keep this revision on train-ai2 and defer deployment. The last hosted function remains unchanged. The prepared deployment would replace only perenual-care.ts inside the retrieved hosted bundle, preserving the existing Demo dataset route and its authentication behavior. Do not blindly deploy the train-ai2 directory over the shared function: the hosted bundle also supports Demo requests.
