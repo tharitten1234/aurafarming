@@ -1,0 +1,28 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    ".tmp": true,
+    "dist": true,
+    "build": true,
+    "coverage": true,
+    "supabase/.temp": true,
+    "supabase/.branches": true,
+    "exports/quota": true,
+    "docs/verified-*": true,
+    "**/*.log": true,
+    "**/.DS_Store": true
+  },
+  "search.exclude": {
+    "**/node_modules/**": true,
+    ".tmp/**": true,
+    "dist/**": true,
+    "build/**": true,
+    "coverage/**": true,
+    "supabase/.temp/**": true,
+    "supabase/.branches/**": true,
+    "exports/quota/**": true,
+    "docs/verified-*": true,
+    "**/*.log": true
+  }
+}
