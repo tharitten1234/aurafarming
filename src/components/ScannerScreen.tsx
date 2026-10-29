@@ -112,7 +112,6 @@ export const ScannerScreen: React.FC<ScannerScreenProps> = ({
           <button
             type="button"
             aria-label="ย้อนกลับ"
-            disabled={isScanning}
             onClick={() => {
               sounds.playTap();
               onBack();

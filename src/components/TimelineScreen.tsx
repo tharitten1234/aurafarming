@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TimelinePhoto, Plant } from '../types';
 import { sounds } from '../utils/soundEffects';
+import { showUnavailableImage } from '../services/images';
 
 interface TimelineScreenProps {
   plants: Plant[];
@@ -179,7 +180,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
               {/* Photo Frame */}
               <div className="relative w-full aspect-square bg-[#2e190e] p-2 rounded-xl shadow-[inset_0_3px_0_#4f2e18,0_3px_0_#1a0f0a] overflow-hidden">
                 <img
-                  src={photo.photoUrl}
+                  src={photo.photoUrl} onError={showUnavailableImage}
                   alt={photo.caption}
                   className="w-full h-full object-cover rounded-lg border border-[#4a2e1b] shadow-inner"
                   loading="lazy"
@@ -266,7 +267,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
             <div className="relative w-full aspect-square rounded-xl overflow-hidden border-2 border-[#5a3624] bg-black">
               {/* Image 1: Day 1 (First Photo) */}
               <img
-                src={day1Photo?.photoUrl || currentPlant.image}
+                src={day1Photo?.photoUrl || currentPlant.image} onError={showUnavailableImage}
                 alt="ภาพวันแรก"
                 className="absolute inset-0 w-full h-full object-cover"
               />
@@ -277,7 +278,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
                 style={{ clipPath: `inset(0 ${100 - compareSlider}% 0 0)` }}
               >
                 <img
-                  src={latestPhoto?.photoUrl || currentPlant.image}
+                  src={latestPhoto?.photoUrl || currentPlant.image} onError={showUnavailableImage}
                   alt="ภาพล่าสุด"
                   className="absolute inset-0 w-full h-full object-cover"
                 />

@@ -5,12 +5,16 @@ import { uploadImage, signedImage, removeImage } from './images';
 let retryNotBefore = 0;
 const failureMessages:Record<string,string>={PLANTNET_UNAVAILABLE:'Pl@ntNet ไม่พร้อมใช้งานชั่วคราว กรุณาลองใหม่ใน 30 วินาที',PLANTNET_TIMEOUT:'Pl@ntNet ตอบช้าเกินกำหนด กรุณาลองใหม่ใน 30 วินาที',PLANTNET_CONFIGURATION:'Pl@ntNet ปฏิเสธสิทธิ์ของเซิร์ฟเวอร์ กรุณาตรวจ API key และการตั้งค่าบัญชี Pl@ntNet'};
 
-export async function analyzePlant(file: Blob) {
+export async function analyzePlant(file: Blob, signal?: AbortSignal) {
+  signal?.throwIfAborted();
   if(Date.now()<retryNotBefore)throw new Error(`กรุณารอ ${Math.ceil((retryNotBefore-Date.now())/1000)} วินาทีก่อนสแกนใหม่`);
   const imagePath = await uploadImage(file, 'scans');
   try {
+    signal?.throwIfAborted();
     const image = await signedImage(imagePath);
-    const { data, error } = await db().functions.invoke('analyze-plant', { body: { imagePath }, timeout: 85000 });
+    signal?.throwIfAborted();
+    const { data, error } = await db().functions.invoke('analyze-plant', { body: { imagePath }, timeout: 85000, signal });
+    signal?.throwIfAborted();
     if (error) {
       const failure = error.context instanceof Response ? await error.context.json().catch(()=>null) : null;
       const seconds = typeof failure?.retryAfterSeconds==='number' ? Math.max(1,Math.min(86400,failure.retryAfterSeconds)) : 0;
@@ -24,6 +28,7 @@ export async function analyzePlant(file: Blob) {
   } catch (error) {
     // Failed scans retain their server-side audit row; remove unused image on failure.
     await removeImage(imagePath).catch(() => undefined);
+    if (signal?.aborted) throw signal.reason;
     if (error instanceof Error && /^(วิเคราะห์|บริการ|เซสชัน|กรุณา|สแกน|Gemini|Perenual|Pl@ntNet|โควตา)/.test(error.message)) throw error;
     throw new Error('ผลวิเคราะห์ไม่สมบูรณ์ กรุณาถ่ายภาพใหม่');
   }

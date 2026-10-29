@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <rect width="640" height="480" fill="#f7f1e5"/>
+  <g fill="none" stroke="#8a6848" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="230" y="115" width="180" height="150" rx="16"/>
+    <circle cx="280" cy="160" r="13"/>
+    <path d="m240 245 55-55 35 35 30-30 40 45M220 285l200-190"/>
+  </g>
+  <text x="320" y="340" text-anchor="middle" font-family="Tahoma,sans-serif" font-size="26" fill="#543924">ไม่สามารถโหลดภาพได้</text>
+  <text x="320" y="380" text-anchor="middle" font-family="Tahoma,sans-serif" font-size="20" fill="#795b3e">ข้อมูลต้นไม้ยังอยู่ กรุณาลองใหม่ภายหลัง</text>
+</svg>

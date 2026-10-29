@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
-import {enrichWithGeminiSafely} from '../_shared/gemini-enrichment.ts';
+import {enrichWithGeminiOutcome} from '../_shared/gemini-enrichment.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -88,10 +88,10 @@ export async function handleRequest(req: Request): Promise<Response> {
       throw new UpstreamError(response.status, Number.isFinite(retryAfter) ? Math.max(1,Math.min(86400,Math.ceil(retryAfter))) : 60);
     } else raw = await response.json();
     const {identification: recognized, response: audit} = normalizePlantnet(raw);
-    const identification = await enrichWithGeminiSafely(recognized);
+    const {identification,careStatus,careError} = await enrichWithGeminiOutcome(recognized);
     const status = !identification.isPlant ? 'not_plant' : identification.confidence < 0.6 ? 'uncertain' : 'completed';
     // Store validated fields only: no upstream query URLs, API keys or submitted bytes.
-    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:recognized.isPlant?'gemini':null} })
+    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:careStatus==='available'?'gemini':null,careStatus,careError} })
       .eq('id', scanId).eq('user_id', ownerId);
     if (error) throw new Error('database');
     return reply({ scanId, identification });

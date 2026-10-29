@@ -14,7 +14,7 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemin
   const env=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PLANTNET_API_KEY','GEMINI_API_KEY'];
   const previous=env.map(k=>Deno.env.get(k));
   env.forEach(k=>Deno.env.set(k,k==='SUPABASE_URL'?'https://test.supabase.co':'test-only'));
-  let plantnetCalls=0,geminiCalls=0,providerStatus=200,quota=0,stored:any;
+  let plantnetCalls=0,geminiCalls=0,providerStatus=200,geminiStatus=200,quota=0,stored:any;
   let upstream:unknown=recognition;
   globalThis.fetch=async(input,init)=>{
     const url=String(input);
@@ -35,6 +35,7 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemin
     }
     if(url.startsWith('https://generativelanguage.googleapis.com/')){
       geminiCalls++;
+      if(geminiStatus!==200)return json({},geminiStatus);
       const body=JSON.parse(String(init?.body));
       const names=JSON.parse(body.contents[0].parts[0].text);
       assert(!JSON.stringify(body).includes('inlineData'),'Gemini does not receive images');
@@ -55,7 +56,12 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemin
     assert(/[\u0e01-\u0e5b]/.test(result.identification.commonName) && result.identification.confidence===.09,'Thai name, original Pl@ntNet confidence');
     assert(result.identification.scientificName==='Selaginella kraussiana' && result.identification.alternativeCandidates[0].confidence===.03,'Original species and alternatives');
     assert(stored.status==='uncertain' && stored.raw_response.careProvider==='gemini','Low confidence and care provenance');
-    upstream={results:[]};const empty=await (await handleRequest(request())).json();assert(!empty.identification.isPlant && geminiCalls===1,'Non-plants skip Gemini');
+    assert(stored.raw_response.careStatus==='available','Successful care audited');
+    geminiStatus=429;
+    const fallback=await (await handleRequest(request())).json();
+    assert(fallback.identification.confidence===.09 && stored.raw_response.careProvider===null && stored.raw_response.careStatus==='unavailable' && stored.raw_response.careError==='GEMINI_CARE_RATE_LIMIT','Fallback keeps recognition and records actual care status');
+    geminiStatus=200;
+    upstream={results:[]};const empty=await (await handleRequest(request())).json();assert(!empty.identification.isPlant && geminiCalls===2 && stored.raw_response.careStatus==='not_requested','Non-plants skip Gemini');
     providerStatus=404;upstream={message:'Species not found'};assert(!(await (await handleRequest(request())).json()).identification.isPlant,'Provider non-plant rejection');
     providerStatus=429;assert((await handleRequest(request())).status===429 && stored.status==='failed','Provider quota recorded');
     providerStatus=200;upstream={results:[{score:2,species:{scientificNameWithoutAuthor:'Invalid'}}]};assert((await handleRequest(request())).status===502,'Invalid recognition rejected');

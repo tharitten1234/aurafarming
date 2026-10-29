@@ -1,7 +1,7 @@
 import type { TimelinePhoto } from '../types';
 import { db, check } from './supabase';
 import { ensureSession } from './auth';
-import { uploadImage, signedImage, removeImage } from './images';
+import { uploadImage, optionalSignedImage, removeImage } from './images';
 import { displayDate } from './plants';
 
 export async function listGrowthLogs(): Promise<TimelinePhoto[]> {
@@ -12,7 +12,7 @@ export async function listGrowthLogs(): Promise<TimelinePhoto[]> {
     const isLatest = !seen.has(row.plant_id); seen.add(row.plant_id);
     return { id: row.id, plantId: row.plant_id, date: displayDate(row.created_at),
       badgeLabel: row.badge_label, badgeIcon: '✨', badgeColor: 'bg-[#c8e6c9] text-[#1b5e20] border-[#81c784]',
-      photoUrl: await signedImage(row.image_path), caption: row.note, careActivity: row.care_activity,
+      photoUrl: await optionalSignedImage(row.image_path), caption: row.note, careActivity: row.care_activity,
       notes: row.notes, plantMatchScore: row.plant_match_score, isLatest };
   }));
 }

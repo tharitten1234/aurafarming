@@ -1,7 +1,7 @@
 import {localizePlantName} from '../../supabase/functions/_shared/thai-plant-names';
 import type { Plant, PlacementConfig, PlantCandidate, ScanResult } from '../types';
 import { db, check } from './supabase';
-import { signedImage } from './images';
+import { optionalSignedImage } from './images';
 import { ensureSession } from './auth';
 import { calculateAuraScore, lightLabels, locationLabels } from './auraScore';
 import { ASSETS } from '../data/mockData';
@@ -29,7 +29,7 @@ export async function listPlants(): Promise<Plant[]> {
       nickname: row.nickname===row.common_name?identification.commonName:row.nickname, daysPlanted: Math.max(1, Math.floor((Date.now() - Date.parse(row.created_at)) / 86400000) + 1),
       auraScore: row.aura_score, plantMatchScore: row.aura_score, source: row.source,
       location: locationLabels[row.placement as PlacementConfig['location']],
-      sunlight: lightLabels[row.light as PlacementConfig['light']], image: row.source === 'manual' ? ASSETS.plant1Thumb : await signedImage(row.image_path),
+      sunlight: lightLabels[row.light as PlacementConfig['light']], image: row.source === 'manual' ? ASSETS.plant1Thumb : await optionalSignedImage(row.image_path),
       imagePath: row.image_path, pixelSprite: /cact|succul|Opuntia/i.test(row.scientific_name) ? ASSETS.plant3Thumb : /Ocimum|basil/i.test(row.scientific_name) ? ASSETS.plant4Thumb : /Jasmin/i.test(row.scientific_name) ? ASSETS.plant2Thumb : ASSETS.plant1Thumb, potType: row.pot_type,
       features: candidateFeatures(identification),
       careStatus: careStatus(row,identification),

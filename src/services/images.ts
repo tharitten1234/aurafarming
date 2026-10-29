@@ -2,6 +2,18 @@ import { db, check } from './supabase';
 import { ensureSession } from './auth';
 
 export const IMAGE_BUCKET = 'plant-images';
+export const IMAGE_UNAVAILABLE = '/image-unavailable.svg';
+
+// A missing optional photo must not prevent the user's garden from loading.
+export async function optionalSignedImage(path: string, sign = signedImage) {
+  try { return await sign(path); }
+  catch { return IMAGE_UNAVAILABLE; }
+}
+
+export function showUnavailableImage(event: { currentTarget: HTMLImageElement }) {
+  const image = event.currentTarget;
+  if (image.getAttribute('src') !== IMAGE_UNAVAILABLE) image.src = IMAGE_UNAVAILABLE;
+}
 export async function compressImage(file: Blob): Promise<Blob> {
   if (!file.type.startsWith('image/') || file.size > 30 * 1024 * 1024)
     throw new Error('เลือกไฟล์ภาพขนาดไม่เกิน 30 MB');

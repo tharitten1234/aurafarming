@@ -45,10 +45,18 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const actionLock = useRef(false);
   const scanEpoch = useRef(0);
+  const scanController = useRef<AbortController | null>(null);
+  const cancelScan = () => {
+    scanEpoch.current++;
+    if (scanController.current) {
+      scanController.current.abort(); scanController.current = null;
+      actionLock.current = false; setBusy(false);
+    }
+  };
   const identity = useRef<string|null>(null);
   const identityEpoch = useRef(0);
   const initialization = useRef(0);
-  const clearGarden = () => {setPlants([]);setTasks([]);setTimelinePhotos([]);setUser(emptyProfile);setScan(null);setStagedPlant(null);setActiveCareId(null);setTimelinePlantId(undefined);scanEpoch.current++;};
+  const clearGarden = () => {setPlants([]);setTasks([]);setTimelinePhotos([]);setUser(emptyProfile);setScan(null);setStagedPlant(null);setActiveCareId(null);setTimelinePlantId(undefined);cancelScan();};
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string | null; icon?: string }>({ message: null });
@@ -114,13 +122,19 @@ export default function App() {
   const handleScan = async (file: Blob) => {
     if (actionLock.current) return;
     const epoch = ++scanEpoch.current;
+    const controller = new AbortController(); scanController.current = controller;
     actionLock.current = true; setBusy(true);
     try {
-      const result = await analyzePlant(file);
+      const result = await analyzePlant(file, controller.signal);
       if (epoch !== scanEpoch.current) return;
       setScan(result); setManualChoice(false); setStagedPlant(result.identification); setCurrentScreen('identify');
     } catch (e) { if (epoch === scanEpoch.current) showToast(message(e), '⚠️'); }
-    finally { actionLock.current = false; setBusy(false); }
+    finally {
+      // A cancelled request may finish after a new scan or write has started.
+      if (scanController.current === controller) {
+        scanController.current = null; actionLock.current = false; setBusy(false);
+      }
+    }
   };
   const handleWaterPlant = (id: string) => mutate(() => recordCare(id, 'water'), 'บันทึกการรดน้ำแล้ว 💧');
   const handleCompleteTask = (id: string) => mutate(() => updateMission(id, 'completed'), 'บันทึกภารกิจสำเร็จแล้ว 🎉');
@@ -199,7 +213,7 @@ export default function App() {
         {/* SCREEN 2: Camera Scanner */}
         {currentScreen === 'scanner' && (
           <ScannerScreen
-            onBack={() => { scanEpoch.current++; setCurrentScreen('garden'); }}
+            onBack={() => { cancelScan(); setCurrentScreen('garden'); }}
             onScanComplete={handleScan}
             onShowToast={showToast}
           />
