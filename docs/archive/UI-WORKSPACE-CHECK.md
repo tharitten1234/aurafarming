@@ -1,5 +1,7 @@
 # UI workspace comparison — 2026-10-02
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 Historical comparison of the earlier ZIP/workspace. Superseded by the subsequently supplied newer RAR, now integrated as documented in [FRIEND-UI-UPGRADE.md](FRIEND-UI-UPGRADE.md).
 
 Checked the supplied Downloads workspace and the ZIP with the same base name.

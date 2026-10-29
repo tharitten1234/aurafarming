@@ -1,5 +1,7 @@
 # Feature rules on train-ai2 — 2026-10-05
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 No screen components, CSS, navigation, assets or App.tsx layout were changed. Existing controls display the revised data and use the existing APIs.
 
 ## Implemented

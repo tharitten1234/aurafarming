@@ -1,5 +1,7 @@
 # Account and farm naming fix — 2026-10-03 (Bangkok)
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 The reported permanent account already had its own profile and zero plants. Its legacy signup name was in Auth metadata, while the profile still displayed `Farmer AUR`. The migration recovers explicit legacy names, including the reported `slac`, without copying another account's garden.
 
 Signup now asks for email and password only. Email confirmation remains required when configured by Supabase. After entering the game, a profile with no farm name must complete the naming screen. The owner-only `set_farm_name` RPC validates 1–80 trimmed characters and saves both `farm_name` and the displayed name. Profiles are created immediately by a private trigger on Auth signup; existing missing profiles are backfilled. Auth remains the identity/password system, and `public.profiles` contains app data linked by `user_id` — no duplicate password/user table is introduced.

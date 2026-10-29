@@ -1,5 +1,7 @@
 # Gemini care restored — 30 October 2026
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 Normal scanning sends the photograph to Pl@ntNet and botanical names only to Gemini for Thai names and care. Species and confidence stay immutable. Existing verified Thai names override generated names. Gemini quota, configuration, timeout and invalid-output failures retain recognition with explicit unavailable-care text. No care facts are fabricated on failure. The normal result screen labels Gemini; Demo's Supabase dataset route remains intact in the shared hosted function.
 
 After explicit deployment authorization, the shared `analyze-plant` function was deployed as version 21. The deployed bundle preserves the Demo dataset route rather than replacing it with the normal-only train-ai2 entrypoint. GEMINI_API_KEY and GEMINI_MODEL secrets exist; values were not revealed or changed. Default model in source is gemini-3.8-flash, but an existing GEMINI_MODEL secret overrides it. A live successful Gemini inference has not yet been verified in this change.

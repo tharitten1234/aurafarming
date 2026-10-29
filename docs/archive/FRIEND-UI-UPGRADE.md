@@ -1,5 +1,7 @@
 # Friend UI upgrade — 2026-10-02
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 Source: `C:/Users/tarit/Downloads/aurafarming---สแกนและดูแลพืชสไตล์พิกเซิล กี.rar`.
 Working project: `C:/Users/tarit/OneDrive/Desktop/aurafarming`.
 Original files are backed up in `.tmp/before-friend-ui` on this computer. The archive's bundled node_modules were not imported.

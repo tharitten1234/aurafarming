@@ -1,6 +1,6 @@
 # Thai display names
 
-Thai display names are a deterministic species-name lookup, not a language-model response. Scientific names, confidence and care facts are preserved. Names are resolved on the client so currently deployed scans and previously saved plants can display the known Thai names without deploying a new Edge Function. No bulk database rewrite is performed.
+The curated Thai display-name lookup is deterministic and separate from generated care advice. It is used on the client and server; scientific names and confidence are preserved. Existing saved plants can display known Thai names without a bulk database rewrite. This document stays at its original path because the source code cites it.
 
 - Ocimum tenuiflorum → กะเพรา: https://www.dtam.moph.go.th/wp-content/uploads/dtam-pamphlet/TPD/2561/dtam-enew-06.pdf
 - Ocimum sanctum → กะเพรา: https://www.rspg.or.th/plants_data/use/herbs09.htm
@@ -8,4 +8,4 @@ Thai display names are a deterministic species-name lookup, not a language-model
 - Ocimum africanum → แมงลัก: https://thbif.onep.go.th/taxons/detail/48064
 - Dracaena trifasciata → ลิ้นมังกร: accepted-name counterpart of Sansevieria trifasciata in the existing catalog; https://www.kew.org/plants/snake-plant
 
-Ocimum basilicum retains the existing catalog label โหระพาอิตาเลียน. No cultivar is inferred from the image. Unknown species are not assigned a fabricated Thai name. The current normal scan path uses Pl@ntNet for image recognition and confidence; Perenual provides database care values formatted by Thai templates, with application-generated unavailable-data messages. Gemini is not used in this path.
+Ocimum basilicum retains the existing catalog label โหระพาอิตาเลียน. No cultivar is inferred from the image. Species outside the lookup are not assigned an invented established Thai name by this mapping. The current normal scan path uses Pl@ntNet for recognition and confidence, with Gemini supplying Thai names and care. The curated lookup takes precedence for known species; Gemini may transliterate other names rather than claim a verified common name. Perenual belongs to an [earlier integration](archive/PERENUAL-CARE.md), not the current normal route.

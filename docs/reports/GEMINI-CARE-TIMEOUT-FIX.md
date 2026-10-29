@@ -1,5 +1,7 @@
 # Gemini care timeout fix — 2026-10-30
 
+> Dated report: results apply to the source and environment recorded below. See the [documentation index](../README.md) for current setup and later verification.
+
 Production logs showed `GEMINI_CARE_TIMEOUT`. Care previously inherited `GEMINI_MODEL`, which could select a slower model intended for another task.
 
 - Care now uses its own `GEMINI_CARE_MODEL`, defaulting to `gemini-3.1-flash-lite`.

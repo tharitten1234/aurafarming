@@ -1,5 +1,7 @@
 # รายงานการตรวจสอบซอร์สโค้ดโครงการ AuraFarming
 
+> Dated report: results apply to the source and environment recorded below. See the [documentation index](../README.md) for current setup and later verification.
+
 วันที่ตรวจสอบ: 30 ตุลาคม 2569  
 Branch: `train-ai2`  
 Commit ตั้งต้น: `1d1d396` พร้อมการแก้ไขใน working tree ณ วันที่ตรวจสอบ จึงไม่ใช่ผลของ commit นี้เพียงอย่างเดียว

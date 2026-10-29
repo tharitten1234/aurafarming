@@ -1,5 +1,7 @@
 # Implementation report — 2026-10-02
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 The existing nine-screen React app has been connected to Supabase services without replacing the UI framework or duplicating screens. The audit is in `AUDIT.md`.
 
 ## Files created
@@ -13,7 +15,7 @@ The existing nine-screen React app has been connected to Supabase services witho
 - `supabase/functions/.env.example`
 - `tests/{domain,database,camera}.test.ts`
 - `scripts/smoke-live.mjs`
-- `docs/{AUDIT,IMPLEMENTATION}.md`
+- `docs/archive/{AUDIT,IMPLEMENTATION}.md`
 - `package-lock.json`
 - Ignored `.env.local` with the supplied public project configuration; no Gemini key.
 
@@ -43,7 +45,7 @@ Edge Function: analyze-plant, deployed and active. It verifies sessions with Aut
 - Anonymous sign-in, real profile initialization/query, mission definitions and empty Garden/Growth queries passed against the actual API after Anonymous Sign-ins was enabled.
 - A real plant reference image from the existing approved asset was uploaded to private Storage, read back through a signed link (63,283 bytes), then removed.
 - Live Gemini analysis identified Monstera deliciosa at confidence 0.98. Hosted plant insertion, database-calculated AuraScore 100, moisture care, mission completion, growth-photo insertion and restored-session reload all passed. The two dedicated CLI test identities and their domain records were cleaned up; uploaded objects were removed by the smoke script.
-- Browser gallery → Gemini identification → placement → AuraScore → save to Garden → page reload passed. The sample Monstera remains in the browser's anonymous garden for review; screenshot: `verified-garden.jpg`.
+- Browser gallery → Gemini identification → placement → AuraScore → save to Garden → page reload passed. The sample Monstera remains in the browser's anonymous garden for review; screenshot: [historical garden capture](../screenshots/verified-garden.jpg).
 - Production JavaScript scan found no GEMINI_API_KEY, Gemini API endpoint, service_role or Google API-key pattern. The publishable Supabase key is intentionally public.
 
 ## Remaining verification

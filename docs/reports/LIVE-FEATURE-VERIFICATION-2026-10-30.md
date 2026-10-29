@@ -1,5 +1,7 @@
 # ผลตรวจ Feature กับระบบจริง — AuraFarming
 
+> Dated report: results apply to the source and environment recorded below. See the [documentation index](../README.md) for current setup and later verification.
+
 วันที่ตรวจ: 30 ตุลาคม 2569 (Asia/Bangkok)
 
 ## สภาพแวดล้อม

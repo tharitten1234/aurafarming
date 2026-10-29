@@ -1,5 +1,7 @@
 # train-ai2 verification — 17 October 2026
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 ## Result
 
 Core application operations passed against the existing hosted Supabase project using disposable accounts. One real scan identified the Wikimedia Commons Monstera photograph as `Monstera deliciosa` with confidence `0.87391`. Recognition remains usable when Perenual is unavailable. Perenual care retrieval is still unavailable in this live check, so complete species care coverage is not verified.

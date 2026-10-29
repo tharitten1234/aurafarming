@@ -1,5 +1,7 @@
 # AuraFarming audit (2026-10-02)
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 Reviewed the 23 original files before implementation. No AGENTS.md, backend,
 Supabase dependency, database migrations, tests, lockfile or installed dependencies existed.
 

@@ -1,5 +1,7 @@
 # Perenual care integration
 
+> Historical record: provider choices, setup steps, and deployment states may be outdated. See the [documentation index](../README.md) for current guidance.
+
 The scan pipeline uses Pl@ntNet for identification and confidence, and Perenual for care lookup by exact scientific name. Gemini is no longer called by `analyze-plant`. Existing saved scans retain their historical advice.
 
 Set `PERENUAL_API_KEY` as an Edge Function secret only. No key belongs in the browser or repository. Endpoint documentation: https://www.perenual.com/docs/api.
