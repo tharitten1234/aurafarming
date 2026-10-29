@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
-import { enrichWithPerenual, PerenualCareError } from '../_shared/perenual-care.ts';
+import {enrichWithGeminiSafely} from '../_shared/gemini-enrichment.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -88,10 +88,10 @@ export async function handleRequest(req: Request): Promise<Response> {
       throw new UpstreamError(response.status, Number.isFinite(retryAfter) ? Math.max(1,Math.min(86400,Math.ceil(retryAfter))) : 60);
     } else raw = await response.json();
     const {identification: recognized, response: audit} = normalizePlantnet(raw);
-    const identification = await enrichWithPerenual(recognized);
+    const identification = await enrichWithGeminiSafely(recognized);
     const status = !identification.isPlant ? 'not_plant' : identification.confidence < 0.6 ? 'uncertain' : 'completed';
     // Store validated fields only: no upstream query URLs, API keys or submitted bytes.
-    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:recognized.isPlant?'perenual':null} })
+    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:recognized.isPlant?'gemini':null} })
       .eq('id', scanId).eq('user_id', ownerId);
     if (error) throw new Error('database');
     return reply({ scanId, identification });
@@ -100,16 +100,6 @@ export async function handleRequest(req: Request): Promise<Response> {
     const category = error instanceof SyntaxError ? 'invalid-json' : error instanceof z.ZodError ? 'invalid-output' :
       error instanceof UpstreamError ? `upstream:${error.status}` : 'service-error';
     console.warn('analyze-plant failed', category);
-    if(error instanceof PerenualCareError){
-      const messages:Record<string,string>={
-        PERENUAL_CARE_CONFIGURATION:'Perenual สำหรับข้อมูลดูแลพืชยังไม่พร้อม กรุณาตรวจAPI keyฝั่งเซิร์ฟเวอร์',
-        PERENUAL_CARE_RATE_LIMIT:'Perenual สำหรับข้อมูลดูแลพืชติดโควตา กรุณารอสักครู่แล้วลองใหม่',
-        PERENUAL_CARE_TIMEOUT:'Perenual ดึงข้อมูลดูแลพืชช้าเกินกำหนด กรุณาลองใหม่',
-        PERENUAL_CARE_UNAVAILABLE:'Perenual สำหรับข้อมูลดูแลพืชไม่พร้อมชั่วคราว กรุณาลองใหม่',
-        PERENUAL_CARE_INVALID:'Perenual ส่งข้อมูลดูแลไม่ถูกต้อง กรุณาลองสแกนใหม่',
-      };
-      return reply({code:error.code,error:messages[error.code],retryAfterSeconds:error.retryAfterSeconds},error.status);
-    }
     if(error instanceof UpstreamError) {
       if(error.status===429) return reply({code:'PLANTNET_RATE_LIMIT',retryAfterSeconds:error.retryAfterSeconds,error:`Pl@ntNet จำกัดการใช้งานหรือโควตาหมด กรุณารอ ${error.retryAfterSeconds} วินาทีแล้วลองใหม่ หรือตรวจโควตาบัญชี Pl@ntNet`},429);
       if([502,503,504].includes(error.status))return reply({code:'PLANTNET_UNAVAILABLE',retryAfterSeconds:30,error:'Pl@ntNet ไม่พร้อมใช้งานชั่วคราว ลองอีกครั้งใน 30 วินาที'},503);

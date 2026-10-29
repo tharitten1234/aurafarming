@@ -1,5 +1,15 @@
 import { enrichWithPerenual,perenualRetryAfter } from '../_shared/perenual-care.ts';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
+import {enrichWithGeminiSafely} from '../_shared/gemini-enrichment.ts';
+Deno.test('Gemini care quota failure keeps recognition and verified Thai names usable',async()=>{
+ const previous=Deno.env.get('GEMINI_API_KEY'),oldFetch=globalThis.fetch;
+ Deno.env.set('GEMINI_API_KEY','test-only');
+ globalThis.fetch=async()=>new Response('{}',{status:429});
+ try{
+  const result=await enrichWithGeminiSafely(normalizePlantnet({results:[{score:.79,species:{scientificNameWithoutAuthor:'Ocimum tenuiflorum'}}]}).identification);
+  if(result.commonName!=='กะเพรา'||result.scientificName!=='Ocimum tenuiflorum'||result.confidence!==.79||!result.description.includes('โควตา'))throw new Error('Quota must not discard recognition');
+ }finally{globalThis.fetch=oldFetch;previous===undefined?Deno.env.delete('GEMINI_API_KEY'):Deno.env.set('GEMINI_API_KEY',previous);}
+});
 Deno.test('Perenual Retry-After handles numeric seconds, HTTP dates, invalid and bounded values',()=>{
  const now=Date.parse('2026-10-17T00:00:00Z');
  for(const [input,expected] of [[null,60],['',60],['90',90],['-1',1],['999999',86400],['invalid',60],['Sat, 17 Oct 2026 00:02:00 GMT',120]] as const){

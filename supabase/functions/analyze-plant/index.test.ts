@@ -9,9 +9,9 @@ const recognition={results:[{score:.09,species:{scientificNameWithoutAuthor:'Sel
 const advice=(scientificName:string)=>({scientificName,commonName:scientificName==='Selaginella kraussiana'?'ซีลาจิเนลลา เคราส์เซียนา':'บ็อกซ์วูด',description:'ตรวจความชื้นดินก่อนรดน้ำ ปรับแสงให้เหมาะกับชนิดพืช',wateringIntervalDays:2,sunlightRequirement:'low',temperatureMinC:18,temperatureMaxC:30,careDifficulty:'moderate',warnings:[]});
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 
-Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Perenual, original scores and ownership',async()=>{
+Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemini, original scores and ownership',async()=>{
   const oldFetch=globalThis.fetch;
-  const env=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PLANTNET_API_KEY','PERENUAL_API_KEY'];
+  const env=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PLANTNET_API_KEY','GEMINI_API_KEY'];
   const previous=env.map(k=>Deno.env.get(k));
   env.forEach(k=>Deno.env.set(k,k==='SUPABASE_URL'?'https://test.supabase.co':'test-only'));
   let plantnetCalls=0,geminiCalls=0,providerStatus=200,quota=0,stored:any;
@@ -33,13 +33,13 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Peren
       assert(new URL(url).searchParams.get('no-reject')==='false','Non-plant rejection enabled');
       return json(upstream,providerStatus);
     }
-    if(url.startsWith('https://www.perenual.com/')){
+    if(url.startsWith('https://generativelanguage.googleapis.com/')){
       geminiCalls++;
-      assert(!init?.body,'Perenual receives no image or confidence');
-      const endpoint=new URL(url);
-      const name=endpoint.searchParams.get('q')??(url.includes('/101?')?'Selaginella kraussiana':'Buxus sempervirens');
-      const row={id:name==='Selaginella kraussiana'?101:102,scientific_name:[name],watering:'Average',sunlight:['Full shade'],care_level:'Moderate'};
-      return json(endpoint.pathname.endsWith('species-list')?{data:[row]}:row);
+      const body=JSON.parse(String(init?.body));
+      const names=JSON.parse(body.contents[0].parts[0].text);
+      assert(!JSON.stringify(body).includes('inlineData'),'Gemini does not receive images');
+      assert(names.every((p:any)=>Object.keys(p).sort().join(',')==='commonName,scientificName'),'Names only, not confidence');
+      return json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({plants:names.map((p:any)=>advice(p.scientificName))})}]}}]});
     }
     throw new Error('Unexpected request');
   };
@@ -49,11 +49,11 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Peren
     assert((await handleRequest(request('other/scans/test.jpg'))).status===403,'Foreign image');
     quota=20;assert((await handleRequest(request())).status===429 && plantnetCalls===0,'Quota before providers');quota=0;
     const response=await handleRequest(request());const result=await response.json();
-    assert(response.status===200 && plantnetCalls===1 && geminiCalls===4,'Both providers called in pipeline');
+    assert(response.status===200 && plantnetCalls===1 && geminiCalls===1,'Both providers called in pipeline');
     assert(/[\u0e01-\u0e5b]/.test(result.identification.commonName) && result.identification.confidence===.09,'Thai name, original Pl@ntNet confidence');
     assert(result.identification.scientificName==='Selaginella kraussiana' && result.identification.alternativeCandidates[0].confidence===.03,'Original species and alternatives');
-    assert(stored.status==='uncertain' && stored.raw_response.careProvider==='perenual','Low confidence and care provenance');
-    upstream={results:[]};const empty=await (await handleRequest(request())).json();assert(!empty.identification.isPlant && geminiCalls===4,'Non-plants skip Perenual');
+    assert(stored.status==='uncertain' && stored.raw_response.careProvider==='gemini','Low confidence and care provenance');
+    upstream={results:[]};const empty=await (await handleRequest(request())).json();assert(!empty.identification.isPlant && geminiCalls===1,'Non-plants skip Gemini');
     providerStatus=404;upstream={message:'Species not found'};assert(!(await (await handleRequest(request())).json()).identification.isPlant,'Provider non-plant rejection');
     providerStatus=429;assert((await handleRequest(request())).status===429 && stored.status==='failed','Provider quota recorded');
     providerStatus=200;upstream={results:[{score:2,species:{scientificNameWithoutAuthor:'Invalid'}}]};assert((await handleRequest(request())).status===502,'Invalid recognition rejected');
@@ -102,7 +102,7 @@ Deno.test('Edge handler: owner isolation, multipart images, non-plant, malformed
   const env = ['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PLANTNET_API_KEY','PERENUAL_API_KEY','GEMINI_CARE_MODEL'];
   const previous = env.map(k => Deno.env.get(k));
   Deno.env.set('SUPABASE_URL','https://test.supabase.co'); Deno.env.set('SUPABASE_SERVICE_ROLE_KEY','test-only');
-  Deno.env.set('PLANTNET_API_KEY','test-only'); Deno.env.set('PERENUAL_API_KEY','test-only'); Deno.env.set('GEMINI_CARE_MODEL','test-care-model');
+  Deno.env.set('PLANTNET_API_KEY','test-only'); Deno.env.set('GEMINI_API_KEY','test-only'); Deno.env.set('GEMINI_CARE_MODEL','test-care-model');
   let output: unknown = sample;
   let upstreamStatus = 200;
   let failed = false;
@@ -120,9 +120,8 @@ Deno.test('Edge handler: owner isolation, multipart images, non-plant, malformed
       if (init?.method === 'POST') {assert(String(init.body).includes('plantnet-v2/all'),'Provider recorded');return json({ id: '33333333-3333-4333-8333-333333333333' });}
       if (init?.method === 'PATCH') {const update=JSON.parse(String(init.body));failed=update.status==='failed';storedStatus=update.status;return new Response(null, { status: 204 }); }
     }
-    if(url.startsWith('https://www.perenual.com/')){
-      const row={id:155,scientific_name:['Monstera deliciosa'],watering:'Average',sunlight:['Part shade'],care_level:'Easy'};
-      return json(new URL(url).pathname.endsWith('species-list')?{data:[row]}:row);
+    if(url.startsWith('https://generativelanguage.googleapis.com/')){
+      return json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({plants:[{...advice('Monstera deliciosa'),commonName:'มอนสเตอร่า'}]})}]}}]});
     }
     if (url.startsWith('https://my-api.plantnet.org/v2/identify/all?')) {
       calls++;
