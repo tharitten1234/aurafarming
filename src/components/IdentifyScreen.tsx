@@ -1,3 +1,4 @@
+import {localizePlantName} from '../../supabase/functions/_shared/thai-plant-names';
 import React, {useState} from 'react';
 import {ASSETS} from '../data/mockData';
 import {PLANT_DATABASE} from '../data/plantDatabase';
@@ -7,7 +8,7 @@ import {candidateFeatures} from '../services/plants';
 import {catalogCandidate} from '../services/catalog';
 interface IdentifyScreenProps {scannedImage:string;result:PlantIdentification;onBack:()=>void;onConfirm:(candidate:PlantCandidate,manual:boolean)=>void;onRetake:()=>void;onShowToast:(msg:string,icon?:string)=>void;}
 type DisplayCandidate={name:string;scientificName:string;confidence:number;confidenceText:string;features:string[];raw:PlantCandidate;manual:boolean;};
-const display=(raw:PlantCandidate,manual=false):DisplayCandidate=>({name:raw.commonName,scientificName:raw.scientificName,confidence:Math.round(raw.confidence*100),confidenceText:manual?'ผู้ใช้เลือกเอง':Math.round(raw.confidence*100)+'%',features:candidateFeatures(raw),raw,manual});
+const display=(candidate:PlantCandidate,manual=false):DisplayCandidate=>{const raw=localizePlantName(candidate);return ({name:raw.commonName,scientificName:raw.scientificName,confidence:Math.round(raw.confidence*100),confidenceText:manual?'ผู้ใช้เลือกเอง':Math.round(raw.confidence*100)+'%',features:candidateFeatures(raw),raw,manual});};
 export const IdentifyScreen:React.FC<IdentifyScreenProps>=({scannedImage,result:identification,onBack,onConfirm,onRetake,onShowToast})=>{
  const isAnalyzing=false;
  const result={primary:display(identification),alternatives:identification.alternativeCandidates.map(p=>display(p)),isUnclear:identification.confidence<.6,unclearReason:identification.isPlant?'Pl@ntNet ให้ความมั่นใจต่ำ กรุณาถ่ายใบหรือดอกให้ชัดขึ้น และตรวจชนิดพืชก่อนใช้คำแนะนำการดูแล':'ภาพนี้ไม่พบพืช กรุณาถ่ายภาพใหม่'};

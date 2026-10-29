@@ -1,3 +1,4 @@
+import {localizePlantName} from '../../supabase/functions/_shared/thai-plant-names';
 import type { Task } from '../types';
 import { db, check } from './supabase';
 import {bangkokWeek,missionCare} from './careRules';
@@ -11,7 +12,7 @@ export async function listMissions(): Promise<Task[]> {
   return (data ?? []).map(row => ({
     id: row.id, kind: row.missions.kind, title: row.missions.title, reward: `+${row.missions.kind==='photo'?15:10} Aura`,
     rewardPoints: row.missions.kind==='photo'?15:10, plantId: row.plant_id,
-    plantName: row.plants.nickname, plantSpecies: row.plants.common_name,
+    plantName: row.plants.nickname, plantSpecies: localizePlantName(identificationSchema.parse(row.plants.identification)).commonName,
     icon: row.missions.icon, iconBg: 'bg-blue-100', isCompleted: row.status === 'completed',
     actionText: row.missions.action_text,
     statusText: row.status === 'completed' ? 'สำเร็จแล้ว' : row.status === 'postponed' ? `เลื่อนถึง ${new Date(row.due_at).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok'})}` :

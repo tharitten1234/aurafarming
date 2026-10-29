@@ -1,3 +1,4 @@
+import {localizePlantName} from '../../supabase/functions/_shared/thai-plant-names';
 import type { Plant, PlacementConfig, PlantCandidate, ScanResult } from '../types';
 import { db, check } from './supabase';
 import { signedImage } from './images';
@@ -22,10 +23,10 @@ export async function listPlants(): Promise<Plant[]> {
   const {data:events,error:historyError}=await db().from('care_events').select('*').order('created_at',{ascending:false}); check(historyError);
   const eventLabels:Record<string,string>={water:'รดน้ำ',dry:'ตรวจดิน: แห้ง',moist:'ตรวจดิน: ชื้น',wet:'ตรวจดิน: แฉะ',move:'ย้ายตำแหน่งปลูก'};
   return Promise.all((data ?? []).map(async row => {
-    const identification = identificationSchema.parse(row.identification);
+    const identification = localizePlantName(identificationSchema.parse(row.identification));
     return {
-      id: row.id, name: row.common_name, scientificName: row.scientific_name,
-      nickname: row.nickname, daysPlanted: Math.max(1, Math.floor((Date.now() - Date.parse(row.created_at)) / 86400000) + 1),
+      id: row.id, name: identification.commonName, scientificName: row.scientific_name,
+      nickname: row.nickname===row.common_name?identification.commonName:row.nickname, daysPlanted: Math.max(1, Math.floor((Date.now() - Date.parse(row.created_at)) / 86400000) + 1),
       auraScore: row.aura_score, plantMatchScore: row.aura_score, source: row.source,
       location: locationLabels[row.placement as PlacementConfig['location']],
       sunlight: lightLabels[row.light as PlacementConfig['light']], image: row.source === 'manual' ? ASSETS.plant1Thumb : await signedImage(row.image_path),
