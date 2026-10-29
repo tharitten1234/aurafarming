@@ -38,6 +38,8 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemin
       const body=JSON.parse(String(init?.body));
       const names=JSON.parse(body.contents[0].parts[0].text);
       assert(!JSON.stringify(body).includes('inlineData'),'Gemini does not receive images');
+      assert(body.generationConfig.maxOutputTokens===4096,'Bound care output length');
+      assert(url.includes('gemini-3.1-flash-lite') && body.generationConfig.thinkingConfig.thinkingLevel==='minimal','Fast care model does not inherit recognition model settings');
       assert(names.every((p:any)=>Object.keys(p).sort().join(',')==='commonName,scientificName'),'Names only, not confidence');
       return json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({plants:names.map((p:any)=>advice(p.scientificName))})}]}}]});
     }

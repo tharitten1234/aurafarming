@@ -136,7 +136,7 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
   const POT_ZONES = [
     { left: '22%', top: '32%', width: '26%', height: '20%' }, // Top-Left: Dieffenbachia
     { left: '52%', top: '32%', width: '26%', height: '20%' }, // Top-Right: Jasmine in blue pot
-    { left: '23%', top: '51%', width: '25%', height: '20%' }, // Bottom-Left: Cactus
+    { left: '22%', top: '51%', width: '26%', height: '20%' }, // Bottom-Left
     { left: '52%', top: '51%', width: '26%', height: '20%' }, // Bottom-Right: Basil in wood crate
   ];
 
@@ -268,7 +268,7 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
         onClick={e=>{e.stopPropagation();sounds.playTap();onNavigate('scanner');}}
         style={{left:zone.left,top:zone.top,width:zone.width,height:zone.height}}
         className="absolute z-10 flex items-end justify-center cursor-pointer group">
-        <img src={ASSETS.emptyPot} alt={`กระถางเปล่า ช่อง ${index+1}`} className="w-[92%] h-[78%] object-contain pixelated drop-shadow-[0_8px_3px_rgba(57,28,7,0.25)] group-hover:brightness-110" />
+        <div className="garden-pot-art"><img src={ASSETS.emptyPot} alt={`กระถางเปล่า ช่อง ${index+1}`} className="w-full h-full pixelated drop-shadow-[0_8px_3px_rgba(57,28,7,0.25)] group-hover:brightness-110" /></div>
       </button>)}
       {plants.slice(0, 4).map((plant, index) => {
         const zone = POT_ZONES[index] || POT_ZONES[0];
@@ -293,10 +293,12 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({
             }}
             className="absolute cursor-pointer z-20 flex items-center justify-center group"
             role="button" tabIndex={0} aria-label={`ดูแล ${plant.nickname}`}
-            onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setActiveMenuPlant(isMenuOpen?null:plant);}}}
+            onKeyDown={e=>{if(e.target===e.currentTarget && (e.key==='Enter'||e.key===' ')){e.preventDefault();setActiveMenuPlant(isMenuOpen?null:plant);}}}
           >
-            {speciesKnown ? <div role="img" aria-label={plant.nickname} className="absolute bottom-0 w-full aspect-square pixelated pointer-events-none drop-shadow-[0_6px_3px_rgba(57,28,7,0.2)]" style={{backgroundImage:`url(${ASSETS.plantsAtlas})`,backgroundSize:'200% 200%',backgroundPosition:spritePosition}}/> : <img src={ASSETS.emptyPot} alt="กระถางที่ยังไม่ระบุชนิดพืช" className="absolute bottom-0 w-[92%] h-[78%] object-contain pixelated pointer-events-none" />}
-            <div className="absolute -top-2 bg-[#241107]/90 text-amber-100 px-2 rounded-lg text-[10px] max-w-full truncate">{plant.nickname}</div>
+            <div className="garden-pot-art">
+              {speciesKnown ? <div role="img" aria-label={plant.nickname} className={`garden-pot-sprite garden-pot-sprite-${plant.pixelSprite===ASSETS.plant3Thumb?'cactus':plant.pixelSprite===ASSETS.plant4Thumb?'wood':'round'} pixelated drop-shadow-[0_6px_3px_rgba(57,28,7,0.2)]`} style={{backgroundImage:`url(${ASSETS.plantsAtlas})`,backgroundSize:'200% 200%',backgroundPosition:spritePosition}}/> : <img src={ASSETS.emptyPot} alt="กระถางที่ยังไม่ระบุชนิดพืช" className="w-full h-full pixelated" />}
+              <div className="garden-pot-name bg-[#241107]/90 text-amber-100 px-2 rounded-lg text-[10px] truncate" title={plant.nickname}>{plant.nickname}</div>
+            </div>
             {/* Subtle Hover Ring */}
             <div className="w-full h-full rounded-2xl group-hover:ring-2 group-hover:ring-amber-300/40 group-hover:bg-amber-300/5 transition-all" />
 

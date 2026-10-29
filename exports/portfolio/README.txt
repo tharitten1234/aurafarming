@@ -1,0 +1,3 @@
+AuraFarming portfolio mockup
+Generated using built-in ImageGen, using user-supplied garden, missions and profile screenshots as references. This is a presentation mockup, not a screenshot of the current running build.
+Prompt summary: Create a polished landscape 16:9 portfolio hero with three smartphone frames showing the existing AuraFarming garden, missions and profile interfaces. Preserve Thai UI, wood/emerald palette, empty garden and authentic zero-progress state. Warm ivory pixel-grid botanical background. Text: AuraFarming; Pixel Plant Care App; Garden • Missions • Profile; UI presentation mockup. No invented features, awards or credentials.

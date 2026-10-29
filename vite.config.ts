@@ -12,6 +12,8 @@ export default defineConfig(() => {
       },
     },
     server: {
+      // Allow only the current Quick Tunnel hostname; update when its URL changes.
+      allowedHosts: ['stages-chances-drive-demonstrates.trycloudflare.com'],
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

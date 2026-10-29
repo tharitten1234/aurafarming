@@ -209,6 +209,13 @@ button:disabled { cursor: wait; opacity: .6; }
 .app-shell { --phone-height: 100dvh; --navigation-height: calc(min(100vw, 430px) * 0.21); --navigation-clearance: calc(var(--navigation-height) * 1.5); }
 .garden-navigation { height: var(--navigation-height); }
 .garden-scene-art { height: calc(100% - var(--navigation-clearance)); }
+/* Both assets use one square frame. Align the visible pot bases, not transparent image edges. */
+.garden-pot-art { position: absolute; bottom: 0; width: 100%; aspect-ratio: 1; pointer-events: none; }
+.garden-pot-sprite { position: absolute; left: 50%; transform: translateX(-50%); aspect-ratio: 1; }
+.garden-pot-sprite-round { width: 133%; bottom: 9.8%; }
+.garden-pot-sprite-cactus { width: 122%; bottom: 10%; }
+.garden-pot-sprite-wood { width: 125%; bottom: 10%; }
+.garden-pot-name { position: absolute; top: 88%; left: 50%; transform: translateX(-50%); max-width: 100%; text-align: center; }
 .missions-screen header > div { gap: 6px; padding-left: 8px; padding-right: 8px; }
 .missions-screen header h1 { font-size: 14px; white-space: nowrap; letter-spacing: 0; }
 .missions-screen main { min-height: 0; padding-left: 10px; padding-right: 10px; }
