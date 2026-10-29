@@ -7,6 +7,7 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
+    "check:presentation": "node scripts/check-presentation.mjs",
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "check:edge": "deno check --config supabase/functions/analyze-plant/deno.json supabase/functions/analyze-plant/index.ts",

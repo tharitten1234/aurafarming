@@ -2,13 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { normalizePlantnet } from '../_shared/plantnet.ts';
 import {enrichWithGeminiOutcome} from '../_shared/gemini-enrichment.ts';
+import {enrichWithDataset} from '../_shared/dataset-care.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
-const requestSchema = z.object({ imagePath: z.string().max(240) }).strict();
+const requestSchema = z.object({ imagePath: z.string().max(240),careSource:z.enum(['perenual','demo-dataset']).optional() }).strict();
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...cors, 'Content-Type': 'application/json' },
 });
@@ -42,7 +43,7 @@ export async function handleRequest(req: Request): Promise<Response> {
     if (text.length > 2048) return reply({ error: 'คำขอไม่ถูกต้อง' }, 400);
     const parsed = requestSchema.safeParse(JSON.parse(text));
     if (!parsed.success) return reply({ error: 'คำขอไม่ถูกต้อง' }, 400);
-    const { imagePath } = parsed.data;
+    const { imagePath,careSource } = parsed.data;
     if (!imagePath.startsWith(`${ownerId}/scans/`) || !/^[a-f0-9-]{36}\/scans\/[a-f0-9-]{36}\.jpg$/.test(imagePath))
       return reply({ error: 'ไม่สามารถเข้าถึงภาพนี้ได้' }, 403);
     const { count, error: limitError } = await admin.from('plant_scans').select('id', { count: 'exact', head: true })
@@ -88,10 +89,21 @@ export async function handleRequest(req: Request): Promise<Response> {
       throw new UpstreamError(response.status, Number.isFinite(retryAfter) ? Math.max(1,Math.min(86400,Math.ceil(retryAfter))) : 60);
     } else raw = await response.json();
     const {identification: recognized, response: audit} = normalizePlantnet(raw);
-    const {identification,careStatus,careError} = await enrichWithGeminiOutcome(recognized);
+    let identification=recognized;
+    let careAudit:Record<string,unknown>={careProvider:null,careStatus:'not_requested',careError:null};
+    if(careSource==='demo-dataset'&&recognized.isPlant){
+      const dataset=await admin.from('demo_plant_care').select('scientific_name,aliases,care').limit(5);
+      if(dataset.error)throw new Error('dataset unavailable');
+      identification=enrichWithDataset(recognized,dataset.data);
+      careAudit={careProvider:'supabase-dataset'};
+    }else if(careSource!=='demo-dataset'){
+      const outcome=await enrichWithGeminiOutcome(recognized);
+      identification=outcome.identification;
+      careAudit={careProvider:outcome.careStatus==='available'?'gemini':null,careStatus:outcome.careStatus,careError:outcome.careError};
+    }
     const status = !identification.isPlant ? 'not_plant' : identification.confidence < 0.6 ? 'uncertain' : 'completed';
     // Store validated fields only: no upstream query URLs, API keys or submitted bytes.
-    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,careProvider:careStatus==='available'?'gemini':null,careStatus,careError} })
+    const { error } = await admin.from('plant_scans').update({ status, identification, raw_response: {...audit,...careAudit} })
       .eq('id', scanId).eq('user_id', ownerId);
     if (error) throw new Error('database');
     return reply({ scanId, identification });

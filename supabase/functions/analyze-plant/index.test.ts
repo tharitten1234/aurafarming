@@ -25,6 +25,7 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemin
       if(init?.method==='POST'){assert(JSON.parse(String(init.body)).gemini_model==='plantnet-v2/all','Recognition audit provider');return json({id:'33333333-3333-4333-8333-333333333333'});}
       if(init?.method==='PATCH'){stored=JSON.parse(String(init.body));return new Response(null,{status:204});}
     }
+    if(url.includes('/rest/v1/demo_plant_care'))return json([{scientific_name:'Selaginella kraussiana',aliases:[],care:advice('Selaginella kraussiana')}]);
     if(url.startsWith('https://my-api.plantnet.org/v2/identify/all?')){
       plantnetCalls++;
       assert(init?.body instanceof FormData,'Pl@ntNet must receive image multipart');
@@ -61,6 +62,8 @@ Deno.test('Hybrid handler: image only to Pl@ntNet, botanical names only to Gemin
     const fallback=await (await handleRequest(request())).json();
     assert(fallback.identification.confidence===.09 && stored.raw_response.careProvider===null && stored.raw_response.careStatus==='unavailable' && stored.raw_response.careError==='GEMINI_CARE_RATE_LIMIT','Fallback keeps recognition and records actual care status');
     geminiStatus=200;
+    const demo=await (await handleRequest(new Request('https://edge.test/',{method:'POST',headers:{Authorization:'Bearer test-token'},body:JSON.stringify({imagePath,careSource:'demo-dataset'})}))).json();
+    assert(demo.identification.confidence===.09 && geminiCalls===2 && stored.raw_response.careProvider==='supabase-dataset','Demo keeps dataset route without Gemini');
     upstream={results:[]};const empty=await (await handleRequest(request())).json();assert(!empty.identification.isPlant && geminiCalls===2 && stored.raw_response.careStatus==='not_requested','Non-plants skip Gemini');
     providerStatus=404;upstream={message:'Species not found'};assert(!(await (await handleRequest(request())).json()).identification.isPlant,'Provider non-plant rejection');
     providerStatus=429;assert((await handleRequest(request())).status===429 && stored.status==='failed','Provider quota recorded');
