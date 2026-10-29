@@ -12,8 +12,13 @@ export function startGuestSession(): Promise<Session> {
     check(error);
     if (data.session) return data.session;
     const signed = await db().auth.signInAnonymously();
-    if (signed.error || !signed.data.session)
-      throw new Error('เริ่มเซสชันไม่ได้ กรุณาเปิด Anonymous Sign-ins ใน Supabase แล้วลองอีกครั้ง');
+    if (signed.error || !signed.data.session) {
+      if(signed.error?.code==='anonymous_provider_disabled')
+        throw new Error('เริ่มเซสชันไม่ได้ กรุณาเปิด Anonymous Sign-ins ใน Supabase แล้วลองอีกครั้ง');
+      if(signed.error?.status===429)
+        throw new Error('เริ่มเซสชันถี่เกินไป กรุณารอสักครู่แล้วลองอีกครั้ง');
+      throw new Error('เชื่อมต่อ Supabase ไม่สำเร็จ หากเพิ่ง Resume โปรเจกต์ กรุณารอให้ระบบพร้อมแล้วลองอีกครั้ง');
+    }
     return signed.data.session;
   })().finally(() => { pendingSession = undefined; });
   return pendingSession;
