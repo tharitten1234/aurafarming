@@ -206,6 +206,15 @@
 
 button:disabled { cursor: wait; opacity: .6; }
 
+/* Preserve the farm palette while supporting keyboards, zoom and reduced motion. */
+.app-shell :is(button, input, select, textarea):focus-visible { outline: 3px solid #fcd477; outline-offset: 3px; }
+.app-shell :is(input, textarea) { user-select: text; }
+.timeline-selector > div:first-child { min-width: 0; flex: 1; }
+.timeline-selector select { max-width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
 .app-shell { --phone-height: 100dvh; --navigation-height: calc(min(100vw, 430px) * 0.21); --navigation-clearance: calc(var(--navigation-height) * 1.5); }
 .garden-navigation { height: var(--navigation-height); }
 .garden-scene-art { height: calc(100% - var(--navigation-clearance)); }

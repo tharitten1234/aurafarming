@@ -11,7 +11,7 @@ A pixel-style plant care web app for identifying plants and keeping a simple car
 
 AuraFarming is a university seminar project for people who want help identifying a plant and remembering how they care for it. It combines a small virtual garden with real plant records, care activities, and growth photos. The app interface is in Thai.
 
-Pl@ntNet identifies plants from photos and returns candidate species and confidence scores. Gemini provides Thai names and care guidance for those species. It cannot change the species or confidence returned by Pl@ntNet.
+Pl@ntNet identifies plants from photos and returns candidate species and confidence scores. Gemini provides Thai names and care guidance for those species, while a curated lookup takes precedence for known Thai names. It cannot change the species or confidence returned by Pl@ntNet.
 
 ## Key Features
 
@@ -23,7 +23,7 @@ Pl@ntNet identifies plants from photos and returns candidate species and confide
 - **Garden management:** add plants manually, rename them, change placement, or archive them.
 - **Progress:** accumulated Aura, care streaks, and badges. Plant Match Score separately estimates placement suitability.
 
-These features have source and test coverage. The [live verification report](docs/reports/LIVE-FEATURE-VERIFICATION-2026-10-30.md) distinguishes browser checks from API checks and lists what remains unverified.
+These features are implemented in source. The [live verification report](docs/reports/LIVE-FEATURE-VERIFICATION-2026-10-30.md) distinguishes browser checks from API checks and lists what remains unverified; not every feature has a complete browser/device test.
 
 ## Tech Stack
 
@@ -107,9 +107,12 @@ Start with the [documentation index](docs/README.md) for technical notes and rep
 - Google sign-in depends on provider configuration and was disabled in the latest recorded live check.
 - AI advice can be unavailable or incorrect. Provider confidence is not a measured project accuracy rate.
 - Plant Match Score uses declared light and placement; it is not a sensor reading or plant health diagnosis.
+- Photo rewards come from completing an eligible weekly mission, not from every upload. Some existing screen labels still use the older AuraScore wording.
 - Growth comparison is manual. Disease diagnosis and push reminders are not implemented.
 
 See the [verification report](docs/reports/LIVE-FEATURE-VERIFICATION-2026-10-30.md) and [dated code review](docs/reports/CODE-REVIEW-REPORT-2026-10-30.md) for evidence and remaining work.
+
+The [system alignment check](docs/SYSTEM-ALIGNMENT.md) identifies remaining legacy template values, UI wording, and differences between the documentation draft and the published branch.
 
 ## Credits
 

@@ -122,7 +122,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               {/* EXP Progress Bar toward next Level */}
               <div className="mt-2.5">
                 <div className="flex justify-between items-center text-[10px] font-bold text-[#4a2e18] mb-0.5">
-                  <span>AuraScore สะสม</span>
+                  <span>ประสบการณ์สู่เลเวลถัดไป</span>
                   <span className="font-mono">
                     {user.exp} / {user.maxExp}
                   </span>
@@ -139,17 +139,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
           {/* Gamification Explanatory Banner (Requirement 7) */}
           <div className="mt-3 p-2 bg-[#f4ebe0] rounded-lg border border-[#cbbca9] text-[10.5px] text-[#5c371d] leading-relaxed">
-            <span className="font-bold text-emerald-800">💡 ระบบคะแนน AuraScore:</span>{' '}
-            เป็นคะแนนสะสมจากการทำภารกิจของผู้เล่น (ไม่ใช่คะแนนสุขภาพของพืช)
+            <span className="font-bold text-emerald-800">💡 ระบบคะแนน Aura:</span>{' '}
+            เป็นคะแนนสะสมของผู้เล่น ไม่ใช่คะแนนสุขภาพพืช ภารกิจภาพรับรางวัลครั้งเดียวต่อต้นต่อสัปดาห์
             <div className="grid grid-cols-3 gap-1 mt-1 text-[9.5px] text-center font-bold">
               <span className="bg-emerald-100/80 text-emerald-900 py-0.5 rounded border border-emerald-300">
                 ทำภารกิจ +10
               </span>
               <span className="bg-purple-100/80 text-purple-900 py-0.5 rounded border border-purple-300">
-                บันทึกภาพ +15
+                ภารกิจภาพ +15
               </span>
               <span className="bg-amber-100/80 text-amber-900 py-0.5 rounded border border-amber-300">
-                ครบสัปดาห์ +30
+                ครบภารกิจสัปดาห์ +30
               </span>
             </div>
           </div>

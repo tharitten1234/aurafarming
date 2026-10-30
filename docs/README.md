@@ -8,6 +8,7 @@ Start with the repository [README](../README.md) for the project overview.
 - [Thai plant name references](THAI-PLANT-NAMES.md): sources for the deterministic name lookup.
 - [Screenshots](screenshots/README.md): existing UI captures and their limitations.
 - [Repository organization](REPOSITORY-CLEANUP.md): moved files, retained assets, and cleanup recommendations.
+- [System alignment check](SYSTEM-ALIGNMENT.md): source/hosted comparison and remaining legacy wording or setup mismatches.
 
 ## Reports
 

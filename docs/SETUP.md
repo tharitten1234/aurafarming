@@ -67,6 +67,8 @@ npx supabase functions deploy analyze-plant --project-ref YOUR_PROJECT_REF --use
 
 The existing [server template](../supabase/functions/.env.example) includes legacy Perenual and Gemini model entries. Its comments and model values are historical: Perenual is not used by the current normal scan route, `GEMINI_MODEL` is not the current care fallback, and an explicit `GEMINI_CARE_MODEL` value overrides the source default. Review those entries rather than copying them blindly. The template is preserved unchanged by the repository cleanup.
 
+The [alignment check](SYSTEM-ALIGNMENT.md) confirms the hosted care override is `gemini-3.1-flash-lite` and lists retained template/UI mismatches. The legacy request value `careSource: perenual` does not switch the current handler back to Perenual; only `demo-dataset` selects the alternate dataset path.
+
 Supabase supplies `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in the function runtime. The existing function configuration turns off gateway legacy JWT verification; the handler still requires a bearer token, verifies it with `auth.getUser()`, and checks ownership before reading a photo. Keep those checks intact.
 
 ## Data and Provider Flow

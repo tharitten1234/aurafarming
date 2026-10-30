@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   ScreenType,
   Plant,
@@ -15,19 +15,20 @@ import { listMissions, updateMission } from './services/missions';
 import { listGrowthLogs, addGrowthLog } from './services/growthLogs';
 import { emptyProfile, loadProfile, deriveBadges, updateDisplayName } from './services/profile';
 import { sounds } from './utils/soundEffects';
+import { ConnectionStatus } from './components/ConnectionStatus';
 import { Navigation } from './components/Navigation';
 import { Toast } from './components/Toast';
 import { GardenScreen } from './components/GardenScreen';
-import { ScannerScreen } from './components/ScannerScreen';
-import { IdentifyScreen } from './components/IdentifyScreen';
-import { PlacementScreen } from './components/PlacementScreen';
-import { AuraScoreScreen } from './components/AuraScoreScreen';
-import { CareDetailScreen } from './components/CareDetailScreen';
-import { MissionsScreen } from './components/MissionsScreen';
-import { TimelineScreen } from './components/TimelineScreen';
-import { ProfileScreen } from './components/ProfileScreen';
+const ScannerScreen = lazy(() => import('./components/ScannerScreen').then(module => ({default: module.ScannerScreen})));
+const IdentifyScreen = lazy(() => import('./components/IdentifyScreen').then(module => ({default: module.IdentifyScreen})));
+const PlacementScreen = lazy(() => import('./components/PlacementScreen').then(module => ({default: module.PlacementScreen})));
+const AuraScoreScreen = lazy(() => import('./components/AuraScoreScreen').then(module => ({default: module.AuraScoreScreen})));
+const CareDetailScreen = lazy(() => import('./components/CareDetailScreen').then(module => ({default: module.CareDetailScreen})));
+const MissionsScreen = lazy(() => import('./components/MissionsScreen').then(module => ({default: module.MissionsScreen})));
+const TimelineScreen = lazy(() => import('./components/TimelineScreen').then(module => ({default: module.TimelineScreen})));
+const ProfileScreen = lazy(() => import('./components/ProfileScreen').then(module => ({default: module.ProfileScreen})));
 import { LoginScreen } from './components/LoginScreen';
-import { FarmSetupScreen } from './components/FarmSetupScreen';
+const FarmSetupScreen = lazy(() => import('./components/FarmSetupScreen').then(module => ({default: module.FarmSetupScreen})));
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('login');
@@ -184,6 +185,8 @@ export default function App() {
 
       {/* Main Mobile Applet Shell (Constrained to mobile portrait viewport 390px - 420px) */}
       <main className="app-shell w-full max-w-[430px] h-[100dvh] sm:w-[min(390px,calc((100dvh-32px)*390/844))] sm:h-[min(844px,calc(100dvh-32px))] bg-[#1a0f09] relative flex flex-col justify-between overflow-hidden shadow-2xl border-0 sm:border-4 border-[#341b10] sm:rounded-3xl">
+        <ConnectionStatus />
+        <Suspense fallback={<div role="status" className="flex-1 flex items-center justify-center text-amber-100">กำลังเปิดหน้า… 🌱</div>}>
         {(loading || loadError) && <div className="absolute inset-0 z-40 bg-[#1a0f09] flex items-center justify-center p-6">
           <div className="wood-box rounded-2xl p-5 text-center space-y-4" role="status">
             <p>{loading ? 'กำลังโหลดสวน… 🌱' : loadError}</p>
@@ -324,6 +327,7 @@ export default function App() {
             pendingTasksCount={pendingTasksCount}
           />
         )}
+        </Suspense>
       </main>
     </div>
   );

@@ -23,7 +23,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
   const [selectedPlantId, setSelectedPlantId] = useState(
     initialPlantId && plants.some((p) => p.id === initialPlantId)
       ? initialPlantId
-      : plants[0]?.id || 'dieff-1'
+      : plants[0]?.id || ''
   );
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [compareSlider, setCompareSlider] = useState(50);
@@ -35,8 +35,8 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
   const [photoFile,setPhotoFile]=useState<File|null>(null);
   const [saving,setSaving]=useState(false);
 
-  const filteredPhotos = timelinePhotos.filter((p) => p.plantId === selectedPlantId);
   const currentPlant = plants.find((p) => p.id === selectedPlantId) || plants[0];
+  const filteredPhotos = timelinePhotos.filter((p) => p.plantId === currentPlant?.id);
 
   const handleAddNewPhoto=async(e:React.FormEvent)=>{
     e.preventDefault();if(!currentPlant||!photoFile||saving)return;setSaving(true);
@@ -81,7 +81,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
         <div className="flex items-center gap-1.5">
           <span className="text-[#fbbf24] text-[11px] animate-pulse">✦</span>
           <h1 className="text-[17px] font-bold tracking-wide text-[#fff3db] drop-shadow-[0_1.5px_0_#1c0c05]">
-            Photo Timeline
+            บันทึกการเติบโต
           </h1>
           <span className="text-[#fbbf24] text-[11px] animate-pulse">✦</span>
         </div>
@@ -105,12 +105,13 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
       </header>
 
       {/* Sub-header Bar: Plant Selector & Stats */}
-      <section className="bg-[#e9dac1] px-4 py-2.5 border-b-2 border-[#d5be9b] flex items-center justify-between shrink-0 shadow-inner z-10">
+      <section className="timeline-selector bg-[#e9dac1] px-4 py-2.5 border-b-2 border-[#d5be9b] flex items-center justify-between shrink-0 shadow-inner z-10">
         <div className="flex items-center gap-2">
           <span className="text-xs text-[#795548] font-medium">ต้นไม้:</span>
-          <div className="relative inline-block">
+          <div className="relative inline-block min-w-0">
             <select
-              value={selectedPlantId}
+              aria-label="เลือกพืชสำหรับบันทึกการเติบโต"
+              value={currentPlant.id}
               onChange={(e) => {
                 sounds.playTap();
                 setSelectedPlantId(e.target.value);
@@ -134,7 +135,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
         </div>
       </section>
 
-      {/* Scrollable Photo Timeline Content */}
+      {/* Scrollable บันทึกการเติบโต Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-3 pb-[calc(var(--navigation-clearance)+16px)] space-y-4 no-scrollbar relative z-10">
         {/* Timeline Guide Rail */}
         <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-[11px] before:top-4 before:bottom-4 before:w-[3px] before:bg-gradient-to-b before:from-[#8d5b38] before:via-[#4caf50] before:to-[#2e7d32] before:rounded-full">
@@ -230,14 +231,14 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
             className="w-full py-2.5 bg-[#4a2e18] hover:bg-[#5c371d] active:translate-y-0.5 text-amber-200 border-2 border-[#2b170c] rounded-xl shadow-[0_3px_0_#2b170c] text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>📷</span>
-            <span>+ บันทึกภาพพัฒนาการใหม่ (+15 AuraScore)</span>
+            <span>+ บันทึกภาพพัฒนาการใหม่</span>
           </button>
         </div>
 
         {/* Encouraging Footer Card */}
         <div className="text-center py-2 px-3 bg-[#e8decb]/60 rounded-xl border border-[#cbbca3]">
           <p className="text-[11px] text-[#6d4c41]">
-            ✨ บันทึกภาพเรียงตามเวลา และกดปุ่ม &quot;เทียบภาพ&quot; เพื่อดูเปรียบเทียบภาพแรกกับภาพล่าสุดได้ตลอดเวลา
+            รับ 15 Aura เมื่อสำเร็จภารกิจภาพประจำสัปดาห์ที่ยังไม่รับรางวัล ไม่ได้คะแนนทุกภาพ • บันทึกภาพเรียงตามเวลา และกดปุ่ม &quot;เทียบภาพ&quot; เพื่อดูเปรียบเทียบภาพแรกกับภาพล่าสุดได้ตลอดเวลา
           </p>
         </div>
       </div>
@@ -344,7 +345,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
           >
             <div className="flex items-center justify-between border-b border-[#5a3624] pb-2">
               <h3 className="font-bold text-sm text-[#fedda0] flex items-center gap-1">
-                <span>📷</span> บันทึกภาพการเติบโต (+15 AuraScore)
+                <span>📷</span> บันทึกภาพการเติบโต
               </h3>
               <button
                 type="button"
@@ -414,7 +415,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
                 type="submit" disabled={!photoFile || saving}
                 className="flex-1 emerald-btn py-2 rounded-xl text-xs font-bold text-white cursor-pointer"
               >
-                บันทึกภาพ (+15 แต้ม)
+                บันทึกภาพ
               </button>
             </div>
           </form>

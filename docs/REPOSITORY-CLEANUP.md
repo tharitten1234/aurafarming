@@ -34,6 +34,7 @@ exports/portfolio/          Existing labelled mockup and provenance
 | `docs/SETUP.md` | Added detailed setup/deployment guidance extracted from the old root README and checked against current source |
 | `docs/THAI-PLANT-NAMES.md` | Corrected the outdated Perenual-only description; kept source citations |
 | `docs/REPOSITORY-CLEANUP.md` | Added organization inventory and future review list |
+| `docs/SYSTEM-ALIGNMENT.md` | Added a subsequent read-only comparison with source and hosted state, plus remaining template/UI mismatches |
 | `docs/archive/README.md` | Added an index identifying historical provider/deployment records |
 | `docs/screenshots/README.md` | Added screenshot index and capture/mockup distinctions |
 
